@@ -6,8 +6,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 80px;
-  padding: 80px 16px 16px;
+  /* Push below navbar + status bar */
+  padding: calc(var(--navbar-total) + var(--space-4)) var(--space-4) var(--space-4);
 }
 
 .search-backdrop {

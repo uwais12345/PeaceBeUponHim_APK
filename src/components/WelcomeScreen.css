@@ -8,6 +8,7 @@
   width: 100%;
   min-height: 100vh;
   min-height: 100svh;
+  min-height: 100dvh;
   overflow: hidden;
   color: #fff;
   background: #0e382b;
@@ -52,8 +53,13 @@
   width: 100%;
   flex-direction: column;
   align-items: center;
-  padding: 0 28px max(12px, env(safe-area-inset-bottom));
+  /* Horizontal safe-area for cutout phones; vertical for home indicator */
+  padding: 0
+    max(28px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(28px, env(safe-area-inset-left, 0px));
   text-align: center;
+  box-sizing: border-box;
 }
 
 .welcome-brand {

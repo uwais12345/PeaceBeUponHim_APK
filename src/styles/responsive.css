@@ -1,0 +1,143 @@
+/* ============================================
+   RESPONSIVE UTILITIES
+   Universal fixes for overflow, images, touch
+   ============================================ */
+
+/* ── Universal image & media safety ── */
+img,
+video,
+svg,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+  /* Avoid images causing horizontal scroll */
+  display: block;
+}
+
+/* Inline SVG icons should stay inline */
+button svg,
+a svg,
+span svg,
+.btn-icon svg {
+  display: inline-block;
+}
+
+/* ── Prevent tables from overflowing ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Touch-target minimum size (48×48 dp recommended by Material / Apple HIG) ── */
+button,
+a,
+[role="button"],
+[role="menuitem"],
+[role="tab"],
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exceptions: icon-only buttons that have explicit size set */
+.navbar-search-btn,
+.navbar-hamburger,
+.btn-icon {
+  min-height: unset;
+  min-width: unset;
+}
+
+/* Bottom nav items get 48px touch targets even though they're smaller visually */
+.bottom-nav-item {
+  min-height: 48px;
+}
+
+/* ── Prevent any fixed-width element from forcing horizontal scroll ── */
+.container,
+.page-wrapper,
+section,
+article,
+aside,
+nav,
+header,
+footer,
+main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ── Word-break for long Arabic / Tamil / URL strings ── */
+.arabic-text,
+.tamil-text,
+p,
+span,
+li,
+td,
+.prose {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ── Landscape orientation on small phones ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Shrink the navbar content area slightly for landscape */
+  .navbar-inner {
+    height: 48px;
+  }
+  /* Qibla page: let it scroll in landscape instead of being clipped */
+  .qibla-page {
+    height: auto;
+    min-height: calc(100dvh - var(--navbar-total));
+    overflow-y: auto;
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── Modal and overlay viewport safety ── */
+.search-modal,
+.mobile-menu-drawer,
+[role="dialog"] {
+  max-width: 100vw;
+  max-height: 100dvh;
+  box-sizing: border-box;
+}
+
+/* ── Bottom nav: never wider than screen ── */
+.bottom-nav {
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+}
+
+/* ── Arabic text clamp on very small screens ── */
+@media (max-width: 360px) {
+  .arabic-xl { font-size: 1.6rem; }
+  .arabic-lg { font-size: 1.3rem; }
+  .arabic-md { font-size: 1.1rem; }
+}
+
+/* ── Fluid section padding on very small screens ── */
+@media (max-width: 360px) {
+  .hm-section {
+    padding: 0 var(--space-3);
+  }
+  .hm-hero {
+    margin: var(--space-3) var(--space-3) 0;
+    padding: var(--space-3);
+  }
+  .hm-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .hm-stat-number {
+    font-size: 0.88rem;
+  }
+  .hm-stat-label {
+    font-size: 0.5rem;
+  }
+}
+

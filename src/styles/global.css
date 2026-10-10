@@ -23,7 +23,9 @@ body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   line-height: var(--leading-normal);
+  /* Use dvh so the bottom nav doesn't shift when browser chrome appears/hides */
   min-height: 100vh;
+  min-height: 100dvh;
   transition: background-color var(--transition-slow), color var(--transition-slow);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -32,16 +34,26 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* Prevent horizontal overflow at body level */
+  overflow-x: hidden;
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
+  /* Prevent horizontal scrolling caused by child overflows */
+  overflow-x: hidden;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  /* Constrain width — max-width 100% prevents any child from breaking the layout */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Container */
@@ -386,13 +398,22 @@ input:focus, textarea:focus, select:focus {
    ============================================ */
 .page-wrapper {
   flex: 1;
-  padding-top: var(--navbar-height);
+  /* --navbar-total includes the status-bar inset on edge-to-edge Android */
+  padding-top: var(--navbar-total);
   padding-bottom: var(--space-8);
+  /* Guard against child elements causing horizontal scroll */
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 @media (max-width: 767px) {
   .page-wrapper {
-    padding-bottom: calc(var(--bottom-nav-height) + var(--space-4));
+    padding-bottom: calc(
+      var(--bottom-nav-height) +
+      var(--space-4) +
+      env(safe-area-inset-bottom, 0px)
+    );
   }
 }
 

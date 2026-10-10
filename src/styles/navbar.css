@@ -7,11 +7,18 @@
   top: 0;
   left: 0;
   right: 0;
-  height: var(--navbar-height);
+  /* Total height = declared height + status bar inset (edge-to-edge Android) */
+  height: var(--navbar-total);
   background: #0e3a2d;
   border-bottom: 1px solid rgba(35, 88, 67, 0.5);
   z-index: var(--z-sticky);
   transition: box-shadow var(--transition-base);
+  /* Extend background colour under the Android status bar on edge-to-edge */
+  padding-top: env(safe-area-inset-top, 0px);
+  /* Extend left/right on devices with camera cutouts */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  box-sizing: border-box;
 }
 
 .navbar.scrolled {
@@ -22,7 +29,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100%;
+  /* Height of the nav row only — the safe-area padding is above it */
+  height: var(--navbar-height);
   padding: 0 var(--space-4);
   gap: var(--space-3);
 }
@@ -381,13 +389,20 @@
   .navbar-hamburger { display: none; }
   .bottom-nav { display: flex; }
   body .page-wrapper {
-    padding-bottom: calc(var(--bottom-nav-height) + var(--space-8) + env(safe-area-inset-bottom));
+    /* Use navbar-total (includes status-bar) for top clearance,
+       and account for floating bottom nav + safe-area bottom */
+    padding-top: var(--navbar-total);
+    padding-bottom: calc(
+      var(--bottom-nav-height) +
+      var(--space-4) +
+      env(safe-area-inset-bottom, 0px)
+    );
   }
   .mobile-menu-drawer {
     max-height: calc(100dvh - 16px);
     padding: var(--space-3);
     padding-bottom: calc(
-      var(--space-3) + var(--bottom-nav-height) + var(--space-2) + env(safe-area-inset-bottom)
+      var(--space-3) + var(--bottom-nav-height) + var(--space-2) + env(safe-area-inset-bottom, 0px)
     );
   }
   .mobile-menu-header { margin-bottom: var(--space-3); }
@@ -397,8 +412,13 @@
     gap: var(--space-1);
     padding: var(--space-2);
     font-size: 0.7rem;
+    min-width: 0;
   }
   .mobile-menu-link svg { width: 18px; height: 18px; }
+  /* Narrow screens: allow label to shrink */
+  .bottom-nav-item-label {
+    font-size: 9px;
+  }
 }
 
 /* Tablet — 768-1023px: hide desktop nav links; hamburger visible (default flex) */

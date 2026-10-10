@@ -16,7 +16,8 @@ const CACHE_TTL = 15 * 60 * 1000;
 async function fetchYT(endpoint, params = {}) {
   if (!isConfigured) throw new Error('YouTube channel ID not configured');
 
-  const url = new URL(PROXY, window.location.origin);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+  const url = new URL(PROXY, baseUrl);
   url.searchParams.set('endpoint', endpoint);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 

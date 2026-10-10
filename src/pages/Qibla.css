@@ -1,5 +1,8 @@
 .qibla-page {
-  height: calc(100vh - var(--navbar-height) - var(--bottom-nav-height));
+  /* dvh excludes browser chrome for reliable full-viewport height;
+     subtract navbar-total (includes status bar) and bottom nav + safe area */
+  height: calc(100vh - var(--navbar-total) - var(--bottom-nav-height) - env(safe-area-inset-bottom, 0px));
+  height: calc(100dvh - var(--navbar-total) - var(--bottom-nav-height) - env(safe-area-inset-bottom, 0px));
   overflow: hidden;
   background: var(--color-bg-primary);
   padding: var(--space-4) var(--space-4) 0;

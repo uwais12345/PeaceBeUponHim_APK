@@ -1,6 +1,7 @@
 .settings-page {
   min-height: 100vh;
-  padding: calc(var(--navbar-height) + var(--space-4)) 0 var(--space-8);
+  min-height: 100dvh;
+  padding: calc(var(--navbar-total) + var(--space-4)) 0 calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
 }
 
 .settings-page > .container {

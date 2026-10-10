@@ -126,6 +126,19 @@
   /* --- NAVBAR HEIGHT --- */
   --navbar-height: 64px;
   --bottom-nav-height: 64px;
+
+  /* --- ANDROID / IOS SAFE AREA INSETS ---
+     These must be read with env() each time they're used.
+     We expose convenient shorthand custom properties where the
+     browser replaces env() at computed-value time. */
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+
+  /* Total vertical space the top navbar occupies including the status bar.
+     On Android edge-to-edge this equals 64px + status-bar-height. */
+  --navbar-total: calc(var(--navbar-height) + env(safe-area-inset-top, 0px));
 }
 
 /* ============================================

@@ -329,3 +329,27 @@
 
 .prayer-error { color: #e88080; }
 
+/* ── Responsive ── */
+@media (max-width: 359px) {
+  /* Very narrow phones: tighter prayer grid */
+  .prayer-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .prayer-card {
+    padding: 7px 4px;
+  }
+  .prayer-name {
+    font-size: 0.52rem;
+  }
+  .prayer-time {
+    font-size: 0.7rem;
+  }
+  /* Drop down clamps to viewport width on very small screens */
+  .prayer-dropdown-list {
+    min-width: 140px;
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 16px);
+  }
+}

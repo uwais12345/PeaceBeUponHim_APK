@@ -6,12 +6,17 @@
 /* ── Page wrapper ── */
 .hm-page {
   min-height: 100vh;
-  padding-top: var(--navbar-height);
+  min-height: 100dvh;
+  /* Use --navbar-total so content clears the status bar on edge-to-edge Android */
+  padding-top: var(--navbar-total);
   padding-bottom: var(--space-8);
   background: #0e3a2d;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  /* Prevent any child from triggering horizontal scroll */
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 
@@ -186,6 +191,9 @@
   border-radius: 16px;
   text-decoration: none;
   transition: background 150ms ease, transform 150ms ease;
+  /* Prevent card from overflowing its grid cell */
+  min-width: 0;
+  overflow: hidden;
 }
 
 [data-theme="light"] .hm-feature-card {
@@ -215,7 +223,7 @@
   background: #f3f9f5;
 }
 
-.hm-feature-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hm-feature-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow: hidden; }
 
 .hm-feature-name {
   display: flex;
@@ -225,6 +233,10 @@
   font-weight: 700;
   color: #ffffff;
   line-height: 1.2;
+  /* Prevent long names from overflowing */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 [data-theme="light"] .hm-feature-name { color: var(--color-text-primary); }
@@ -484,9 +496,28 @@
 }
 
 /* ── Responsive ── */
+/* Extra-narrow phones (320px) — feature cards go single column */
+@media (max-width: 359px) {
+  .hm-features-grid {
+    grid-template-columns: 1fr;
+  }
+  .hm-hero-actions {
+    flex-direction: column;
+  }
+  .hm-btn-yt,
+  .hm-btn-ig {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 767px) {
   .hm-page {
-    padding-bottom: calc(var(--bottom-nav-height) + var(--space-6) + env(safe-area-inset-bottom));
+    padding-bottom: calc(
+      var(--bottom-nav-height) +
+      var(--space-4) +
+      env(safe-area-inset-bottom, 0px)
+    );
   }
 }
 
