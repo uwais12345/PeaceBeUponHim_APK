@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import aboutBanner from '../assets/about-banner.svg';
 

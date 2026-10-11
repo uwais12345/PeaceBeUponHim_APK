@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2, Compass, MapPin, Navigation, RefreshCw,
-  RotateCw, ShieldCheck, TriangleAlert,
+  RotateCcw, RotateCw, ShieldCheck, TriangleAlert,
 } from 'lucide-react';
 import {
-  calculateQiblaBearing, getAlignmentState, normalizeBearing,
-  shortestAngleDifference, smoothHeading,
+  calculateQiblaBearing, calculateTurnDirection, estimateMagneticDeclination,
+  getAlignmentState, normalizeBearing, shortestAngleDifference, smoothHeading,
 } from '../services/qiblaCalculator';
+import { getUserLocation, watchUserLocation } from '../services/locationService';
 import './Qibla.css';
 
 const ALIGN_ENTER_THRESHOLD = 5;
@@ -17,21 +18,46 @@ const hasIOSPermissionGate =
   typeof DeviceOrientationEvent !== 'undefined' &&
   typeof DeviceOrientationEvent.requestPermission === 'function';
 
-function headingFromEvent(event) {
-  if (Number.isFinite(event.webkitCompassHeading)) return normalizeBearing(event.webkitCompassHeading);
-  if (event.absolute === true && Number.isFinite(event.alpha)) {
-    // The W3C alpha axis is based on the device's natural (portrait) screen
-    // orientation. Correct it when the user holds the screen in landscape.
-    const screenAngle = window.screen?.orientation?.angle ?? window.orientation ?? 0;
-    return normalizeBearing(360 - event.alpha + screenAngle);
+function headingFromEvent(event, declination = 0) {
+  // 1. iOS Safari provides webkitCompassHeading (0-360 clockwise from North)
+  if (Number.isFinite(event.webkitCompassHeading)) {
+    return normalizeBearing(event.webkitCompassHeading);
   }
+
+  // 2. Android Chrome & standards-compliant mobile browsers
+  if (Number.isFinite(event.alpha)) {
+    // Screen orientation angle (portrait = 0, landscape = 90 / 270)
+    const screenAngle = window.screen?.orientation?.angle ?? window.orientation ?? 0;
+    // W3C alpha is counter-clockwise [0, 360). Clockwise heading = 360 - alpha.
+    let heading = 360 - event.alpha + screenAngle;
+    // Apply true-north correction (magnetic declination)
+    if (declination) {
+      heading += declination;
+    }
+    return normalizeBearing(heading);
+  }
+
   return null;
 }
 
 function CompassDial({ heading, qiblaBearing, alignment }) {
   const dialRotation = heading == null ? 0 : -heading;
-  const targetRotation = heading != null && qiblaBearing != null
-    ? shortestAngleDifference(heading, qiblaBearing) : 0;
+
+  // Relative rotation from top marker (12 o'clock) to Qibla
+  // When heading is known: shortest angle difference from heading to Qibla bearing
+  // When heading is unknown: point to Qibla bearing on the stationary dial
+  const targetAngle = (heading != null && qiblaBearing != null)
+    ? shortestAngleDifference(heading, qiblaBearing)
+    : (qiblaBearing ?? 0);
+
+  // Smoothly unwrap rotation angle to prevent 360° flip across the ±180° boundary
+  const prevAngleRef = useRef(targetAngle);
+  const unwrappedAngleRef = useRef(targetAngle);
+
+  const angleDiff = shortestAngleDifference(prevAngleRef.current, targetAngle);
+  unwrappedAngleRef.current += angleDiff;
+  prevAngleRef.current = targetAngle;
+
   const isAligned = alignment === 'aligned';
 
   return (
@@ -60,7 +86,7 @@ function CompassDial({ heading, qiblaBearing, alignment }) {
         </g>
       </svg>
       {qiblaBearing != null && <div className="qibla-pointer" aria-hidden="true"
-        style={{ transform: `translateX(-50%) rotate(${targetRotation}deg)` }}>
+        style={{ transform: `translateX(-50%) rotate(${unwrappedAngleRef.current}deg)` }}>
         <svg viewBox="0 0 32 118" className="qibla-pointer-svg">
           <path d="M16 5 26 101 16 114 6 101Z" className="qibla-pointer-body" />
           <circle cx="16" cy="12" r="7" className="qibla-pointer-tip" />
@@ -83,9 +109,12 @@ export default function QiblaPage() {
   const [compassState, setCompassState] = useState('idle');
   const [heading, setHeading] = useState(null);
   const [alignment, setAlignment] = useState('unknown');
+
   const cleanupRef = useRef(null);
   const smoothRef = useRef(null);
   const alignedRef = useRef(false);
+  const declinationRef = useRef(0);
+  const watchIdRef = useRef(null);
 
   const stopCompass = useCallback(() => {
     cleanupRef.current?.();
@@ -98,10 +127,12 @@ export default function QiblaPage() {
     alignedRef.current = false;
     setHeading(null);
     setAlignment('unknown');
+
     if (typeof window.DeviceOrientationEvent === 'undefined') {
       setCompassState('unavailable');
       return;
     }
+
     setCompassState('requesting');
     if (hasIOSPermissionGate && !skipPermission) {
       try {
@@ -114,23 +145,27 @@ export default function QiblaPage() {
         return;
       }
     }
+
     let received = false;
     const onOrientation = (event) => {
-      const rawHeading = headingFromEvent(event);
+      const rawHeading = headingFromEvent(event, declinationRef.current);
       if (rawHeading == null) return;
       received = true;
       smoothRef.current = smoothHeading(smoothRef.current, rawHeading, 0.2);
       setHeading(smoothRef.current);
       setCompassState('active');
     };
+
     window.addEventListener('deviceorientationabsolute', onOrientation, true);
     window.addEventListener('deviceorientation', onOrientation, true);
+
     const timeout = window.setTimeout(() => {
       if (!received) {
         stopCompass();
         setCompassState('unavailable');
       }
     }, SENSOR_TIMEOUT_MS);
+
     cleanupRef.current = () => {
       window.removeEventListener('deviceorientationabsolute', onOrientation, true);
       window.removeEventListener('deviceorientation', onOrientation, true);
@@ -139,8 +174,6 @@ export default function QiblaPage() {
   }, [stopCompass]);
 
   const requestLocation = useCallback(async () => {
-    if (!navigator.geolocation) { setLocationState('unsupported'); return; }
-    
     let compassPerm = 'unknown';
     if (hasIOSPermissionGate) {
       try {
@@ -151,20 +184,57 @@ export default function QiblaPage() {
     }
 
     setLocationState('requesting');
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setQiblaBearing(calculateQiblaBearing(coords.latitude, coords.longitude));
-        setLocationState('granted');
-        if (compassPerm !== 'denied') {
-          startCompass(true);
-        } else {
-          setCompassState('denied');
-        }
-      },
-      (error) => setLocationState(error.code === error.PERMISSION_DENIED ? 'denied' : 'error'),
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 },
-    );
+
+    const handleCoords = (coords) => {
+      const dec = estimateMagneticDeclination(coords.latitude, coords.longitude);
+      declinationRef.current = dec;
+      setQiblaBearing(calculateQiblaBearing(coords.latitude, coords.longitude));
+      setLocationState('granted');
+      if (compassPerm !== 'denied') {
+        startCompass(true);
+      } else {
+        setCompassState('denied');
+      }
+    };
+
+    try {
+      const loc = await getUserLocation({ allowIPFallback: true });
+      handleCoords(loc);
+
+      // Continuous watch for position updates
+      if (watchIdRef.current != null) {
+        watchIdRef.current(); // call the returned cleanup function
+        watchIdRef.current = null;
+      }
+      watchUserLocation(
+        (coords) => {
+          const dec = estimateMagneticDeclination(coords.latitude, coords.longitude);
+          declinationRef.current = dec;
+          setQiblaBearing(calculateQiblaBearing(coords.latitude, coords.longitude));
+        },
+        null,
+      ).then((cleanup) => {
+        watchIdRef.current = cleanup;
+      });
+    } catch (err) {
+      console.error('Qibla location error:', err);
+      if (err.code === 'PERMISSION_DENIED') {
+        setLocationState('denied');
+      } else {
+        setLocationState('error');
+      }
+    }
   }, [startCompass]);
+
+  const liveCompass = compassState === 'active' && heading != null;
+  const displayBearing = qiblaBearing != null ? normalizeBearing(Math.round(qiblaBearing)) : null;
+  const displayHeading = liveCompass ? normalizeBearing(Math.round(heading)) : null;
+
+  // Turn guidance and consistency
+  const turnInfo = useMemo(() => {
+    if (displayHeading == null || displayBearing == null) return null;
+    return calculateTurnDirection(displayHeading, displayBearing, ALIGN_ENTER_THRESHOLD);
+  }, [displayHeading, displayBearing]);
 
   const angularDifference = useMemo(() => (
     heading != null && qiblaBearing != null ? Math.abs(shortestAngleDifference(heading, qiblaBearing)) : null
@@ -179,7 +249,15 @@ export default function QiblaPage() {
     if (enteringAlignment && navigator.vibrate) navigator.vibrate(45);
   }, [angularDifference]);
 
-  useEffect(() => () => stopCompass(), [stopCompass]);
+  useEffect(() => {
+    return () => {
+      stopCompass();
+      if (typeof watchIdRef.current === 'function') {
+        watchIdRef.current();
+        watchIdRef.current = null;
+      }
+    };
+  }, [stopCompass]);
 
   if (isDesktop) {
     return (
@@ -218,13 +296,23 @@ export default function QiblaPage() {
     </main>;
   }
 
-  const liveCompass = compassState === 'active' && heading != null;
+  const remainingDegrees = turnInfo?.degrees ?? (angularDifference != null ? Math.round(angularDifference) : 0);
+  const isTurnAnticlockwise = turnInfo?.direction === 'anticlockwise';
+
   const status = alignment === 'aligned'
     ? { title: 'Facing Qibla', body: 'You are within 5° of the Qibla direction.', icon: CheckCircle2 }
     : alignment === 'near'
-      ? { title: 'Almost there', body: `${Math.round(angularDifference)}° remaining. Keep rotating slowly.`, icon: RotateCw }
+      ? {
+          title: 'Almost there',
+          body: `${remainingDegrees}° remaining. Keep rotating ${isTurnAnticlockwise ? 'anticlockwise' : 'clockwise'} slowly.`,
+          icon: isTurnAnticlockwise ? RotateCcw : RotateCw,
+        }
       : liveCompass
-        ? { title: 'Rotate toward Qibla', body: `${Math.round(angularDifference)}° remaining. Align the gold pointer with the top marker.`, icon: RotateCw }
+        ? {
+            title: isTurnAnticlockwise ? 'Rotate anticlockwise toward Qibla' : 'Rotate clockwise toward Qibla',
+            body: `${remainingDegrees}° remaining. Align the gold pointer with the top marker.`,
+            icon: isTurnAnticlockwise ? RotateCcw : RotateCw,
+          }
         : { title: 'Compass not active', body: 'Enable your phone compass for live direction guidance.', icon: Compass };
   const StatusIcon = status.icon;
 
@@ -234,8 +322,8 @@ export default function QiblaPage() {
       <StatusIcon size={21} aria-hidden="true" /><div><h2>{status.title}</h2><p>{status.body}</p></div>
     </section>
     <section className="qibla-readings" aria-label="Qibla readings">
-      <div><span>Qibla bearing</span><strong>{Math.round(qiblaBearing)}°</strong><small>from North</small></div>
-      <div><span>Current heading</span><strong>{liveCompass ? `${Math.round(heading)}°` : '—'}</strong><small>{liveCompass ? 'live compass' : 'not available'}</small></div>
+      <div><span>Qibla bearing</span><strong>{displayBearing != null ? `${displayBearing}°` : '—'}</strong><small>from North</small></div>
+      <div><span>Current heading</span><strong>{displayHeading != null ? `${displayHeading}°` : '—'}</strong><small>{liveCompass ? 'live compass' : 'not available'}</small></div>
     </section>
     {!liveCompass && <section className="qibla-sensor-card">
       <ShieldCheck size={19} aria-hidden="true" /><div>
@@ -248,6 +336,5 @@ export default function QiblaPage() {
         </button>
       </div>
     </section>}
-    {liveCompass && <p className="qibla-calibration" role="note"><TriangleAlert size={16} /> Keep the phone level and away from magnets or metal. If direction drifts, calibrate it using your device’s recommended method.</p>}
   </main>;
 }

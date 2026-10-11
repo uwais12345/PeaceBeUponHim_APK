@@ -8,6 +8,7 @@ import {
   findPlaceCoordinates,
   getGoogleMapsSearchUrl,
 } from '../services/masjidService';
+import { getUserLocation } from '../services/locationService';
 import './NearbyMasjids.css';
 
 const MAX_LOCATION_ACCURACY_METERS = 2000;
@@ -46,13 +47,9 @@ export default function NearbyMasjids() {
     }
   }, []);
 
-  const requestLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Location is not available in this browser. Please enable location access and try again.');
-      return;
-    }
-
+  const requestLocation = async () => {
     searchSequence.current += 1;
+    const sequence = searchSequence.current;
     setLocation(null);
     setLocationLabel('');
     setMasjids([]);
@@ -61,40 +58,35 @@ export default function NearbyMasjids() {
     setRequestingLocation(true);
     setLocationError('');
     setPermissionDenied(false);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setRequestingLocation(false);
-        const accuracyMeters = position.coords.accuracy;
-        const acceptedAccuracyMeters = Math.min(SEARCH_RADIUS_KM * 1000, MAX_LOCATION_ACCURACY_METERS);
-        if (!Number.isFinite(accuracyMeters) || accuracyMeters > acceptedAccuracyMeters) {
-          const approximateAccuracy = Number.isFinite(accuracyMeters)
-            ? ` (about ${Math.round(accuracyMeters / 1000)} km accuracy)`
-            : '';
-          setLocationError(
-            `Your browser only provided an approximate location${approximateAccuracy}. Enable precise location or search by town or area below.`,
-          );
-          return;
-        }
-        searchNearby({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        }, false, '');
-      },
-      error => {
-        setRequestingLocation(false);
-        if (error.code === 1) {
-          setPermissionDenied(true);
-          setLocationError('');
-        } else if (error.code === 3) {
-          setLocationError('Location request timed out. Please try again.');
-        } else if (error.code === 2) {
-          setLocationError('Your device could not determine its location. Turn on device location or search by town or area below.');
-        } else {
-          setLocationError('We couldn’t get your location. Please try again or search by town or area below.');
-        }
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 },
-    );
+
+    try {
+      const loc = await getUserLocation({ allowIPFallback: true });
+      if (sequence !== searchSequence.current) return;
+      setRequestingLocation(false);
+
+      // For IP-based locations the accuracy field may be undefined — allow it through
+      const accuracyMeters = loc.accuracy;
+      const acceptedAccuracyMeters = Math.min(SEARCH_RADIUS_KM * 1000, MAX_LOCATION_ACCURACY_METERS);
+      if (loc.source !== 'ip' && Number.isFinite(accuracyMeters) && accuracyMeters > acceptedAccuracyMeters) {
+        const approximateAccuracy = ` (about ${Math.round(accuracyMeters / 1000)} km accuracy)`;
+        setLocationError(
+          `Your device only provided an approximate location${approximateAccuracy}. Enable precise location or search by town or area below.`,
+        );
+        return;
+      }
+
+      searchNearby({ latitude: loc.latitude, longitude: loc.longitude }, false, loc.city || '');
+    } catch (err) {
+      if (sequence !== searchSequence.current) return;
+      setRequestingLocation(false);
+      console.error('NearbyMasjids location error:', err);
+      if (err.code === 'PERMISSION_DENIED') {
+        setPermissionDenied(true);
+        setLocationError('');
+      } else {
+        setLocationError('We could not get your location. Please try again or search by town or area below.');
+      }
+    }
   };
 
   const requestPlaceSearch = async query => {

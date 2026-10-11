@@ -137,11 +137,10 @@ export function BookmarkProvider({ children }) {
     toastTimer.current = setTimeout(() => setToastMsg(''), 2500);
   }, []);
 
-  const save = useCallback(() => {
+  // Persist bookmarks whenever they change
+  useEffect(() => {
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
   }, [bookmarks]);
-
-  useEffect(() => { save(); }, [bookmarks, save]);
 
   const isBookmarked = useCallback((type, id) =>
     bookmarks.some(b => b.type === type && b.id === String(id)), [bookmarks]);

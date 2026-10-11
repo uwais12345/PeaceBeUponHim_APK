@@ -6,7 +6,7 @@
 .nearby-hero {
   position: relative;
   min-height: 190px;
-  margin: 0 0 1.25rem;
+  margin: var(--space-5) 0 1.25rem;
   overflow: hidden;
   isolation: isolate;
   background: #28644c;

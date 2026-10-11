@@ -10,7 +10,6 @@ export default function NamesOfAllah() {
   const [isPaused, setIsPaused] = useState(false);
   const [queuePosition, setQueuePosition] = useState(0);
   const [audioError, setAudioError] = useState('');
-  const audioRef = useRef(null);
   const playbackRun = useRef(0);
   const queueIndex = useRef(0);
 
@@ -28,80 +27,81 @@ export default function NamesOfAllah() {
 
   const stopPlayback = () => {
     playbackRun.current += 1;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.removeAttribute('src');
-      audioRef.current.load();
-    }
+    window.speechSynthesis.cancel();
     setPlayingNumber(null);
     setPlaybackMode(null);
     setIsPaused(false);
+    setQueuePosition(0);
   };
 
-  const playFromIndex = (index, mode, run) => {
+  const speakName = (index, mode, run) => {
+    if (run !== playbackRun.current) return;
     const name = NAMES_OF_ALLAH[index];
-    const audio = audioRef.current;
-    if (!name || !audio || run !== playbackRun.current) return;
+    if (!name) {
+      setPlayingNumber(null);
+      setPlaybackMode(null);
+      setIsPaused(false);
+      return;
+    }
 
     queueIndex.current = index;
     setQueuePosition(index + 1);
     setPlayingNumber(name.number);
     setAudioError('');
 
-    const failPlayback = error => {
-      if (run !== playbackRun.current) return;
-      setAudioError(
-        `Arabic audio could not play${error?.message ? `: ${error.message}` : ''}. Check your internet connection and try again.`,
-      );
-      setPlayingNumber(null);
-      setPlaybackMode(null);
-      setIsPaused(false);
-    };
+    const utter = new SpeechSynthesisUtterance(name.arabic);
+    utter.lang = 'ar-SA';
+    utter.rate = 0.85;
+    utter.pitch = 1;
 
-    audio.onended = () => {
+    const voices = window.speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
+    if (arabicVoice) utter.voice = arabicVoice;
+
+    utter.onend = () => {
       if (run !== playbackRun.current) return;
       if (mode === 'all' && queueIndex.current + 1 < NAMES_OF_ALLAH.length) {
-        playFromIndex(queueIndex.current + 1, mode, run);
+        speakName(queueIndex.current + 1, mode, run);
       } else {
         setPlayingNumber(null);
         setPlaybackMode(null);
         setIsPaused(false);
       }
     };
-    audio.onerror = () => {
+
+    utter.onerror = (e) => {
       if (run !== playbackRun.current) return;
-      failPlayback(new Error('The audio file could not be loaded'));
+      if (e.error === 'interrupted' || e.error === 'canceled') return;
+      setAudioError('Audio could not play. Your device may not support Arabic speech.');
+      setPlayingNumber(null);
+      setPlaybackMode(null);
+      setIsPaused(false);
     };
 
-    audio.src = `/api/names-audio?number=${name.number}`;
-    audio.load();
-    audio.play().catch(failPlayback);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
   };
 
   const playOne = name => {
     stopPlayback();
     const run = ++playbackRun.current;
     setPlaybackMode('single');
-    playFromIndex(name.number - 1, 'single', run);
+    speakName(name.number - 1, 'single', run);
   };
 
   const playAll = () => {
     stopPlayback();
     const run = ++playbackRun.current;
     setPlaybackMode('all');
-    playFromIndex(0, 'all', run);
+    speakName(0, 'all', run);
   };
 
   const togglePause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
     if (isPaused) {
-      audio.play().catch(error => {
-        setAudioError(`Audio could not resume: ${error.message}`);
-      });
+      window.speechSynthesis.resume();
       setIsPaused(false);
     } else {
-      audio.pause();
+      window.speechSynthesis.pause();
       setIsPaused(true);
     }
   };
@@ -111,7 +111,7 @@ export default function NamesOfAllah() {
       <div className="container names-page">
         <header className="names-header">
           <span className="names-header-icon" aria-hidden="true"><Sparkles size={25} /></span>
-          <h1>Allah’s Beautiful Names</h1>
+          <h1>Allah's Beautiful Names</h1>
           <p className="tamil-text">அல்லாஹ்வின் அழகிய திருநாமங்கள்</p>
           <p className="names-note">
             Commonly circulated list of 99 names; translations are brief explanations and may vary.
@@ -146,10 +146,9 @@ export default function NamesOfAllah() {
               ? `Playing ${queuePosition} of 99`
               : playbackMode === 'single' && playingNumber
                 ? `Playing name ${playingNumber}`
-                : 'Generated Arabic voice · requires internet'}
+                : 'Arabic voice \u00b7 works offline'}
           </p>
           {audioError && <p className="names-audio-error" role="alert">{audioError}</p>}
-          <audio ref={audioRef} preload="none" />
         </section>
 
         <label className="names-search">

@@ -6,6 +6,8 @@
 const BASE = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions';
 const cache = new Map();
 
+// Hadith is online-only — fetches from cdn.jsdelivr.net at runtime.
+// In-memory cache deduplicates repeated calls within the same session.
 async function fetchCached(url) {
   if (cache.has(url)) return cache.get(url);
   const res = await fetch(url);

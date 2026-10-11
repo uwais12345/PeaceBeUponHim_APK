@@ -1,0 +1,100 @@
+{
+  "sessions": [
+    { "id": "after-prayer", "name": "After Prayer", "tamil": "தொழுகைக்குப் பின்", "icon": "🕌" },
+    { "id": "morning", "name": "Morning", "tamil": "காலை", "icon": "🌅" },
+    { "id": "evening", "name": "Evening", "tamil": "மாலை", "icon": "🌇" },
+    { "id": "general", "name": "General", "tamil": "பொதுவான", "icon": "📿" }
+  ],
+  "dhikrList": [
+    {
+      "id": "subhanallah-33",
+      "session": "after-prayer",
+      "arabic": "سُبْحَانَ اللَّهِ",
+      "transliteration": "SubhanAllah",
+      "meaning_tamil": "அல்லாஹ் மிகத் தூயவன்",
+      "meaning_english": "Glory be to Allah",
+      "target": 33,
+      "source": "Sahih Muslim 595"
+    },
+    {
+      "id": "alhamdulillah-33",
+      "session": "after-prayer",
+      "arabic": "الْحَمْدُ لِلَّهِ",
+      "transliteration": "Alhamdulillah",
+      "meaning_tamil": "அல்லாஹ்வுக்கே எல்லாப் புகழும்",
+      "meaning_english": "All praise is for Allah",
+      "target": 33,
+      "source": "Sahih Muslim 595"
+    },
+    {
+      "id": "allahuakbar-33",
+      "session": "after-prayer",
+      "arabic": "اللَّهُ أَكْبَرُ",
+      "transliteration": "Allahu Akbar",
+      "meaning_tamil": "அல்லாஹ் மிகப் பெரியவன்",
+      "meaning_english": "Allah is the Greatest",
+      "target": 33,
+      "source": "Sahih Muslim 595"
+    },
+    {
+      "id": "lailaha-1",
+      "session": "after-prayer",
+      "arabic": "لاَ إِلَـٰهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+      "transliteration": "Laa ilaaha illallaahu wahdahu laa shareeka lahu, lahul-mulku wa lahul-hamdu wa Huwa 'alaa kulli shay'in Qadeer",
+      "meaning_tamil": "அல்லாஹ்வைத் தவிர வேறு இறைவன் இல்லை. அவன் ஒருவனே, அவனுக்கு இணையே இல்லை. ஆட்சி அவனுக்கே, புகழும் அவனுக்கே. அவன் எல்லாவற்றின் மீதும் ஆற்றலுடையவன்.",
+      "meaning_english": "None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+      "target": 1,
+      "source": "Sahih Muslim 593"
+    },
+    {
+      "id": "morning-subhanallah",
+      "session": "morning",
+      "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+      "transliteration": "SubhanAllahi wa bihamdihi",
+      "meaning_tamil": "அல்லாஹ் தூயவன், அவனுக்கே எல்லாப் புகழும்",
+      "meaning_english": "Glory and praise be to Allah",
+      "target": 100,
+      "source": "Sahih al-Bukhari 6405, Sahih Muslim 2692"
+    },
+    {
+      "id": "morning-lailaha",
+      "session": "morning",
+      "arabic": "لاَ إِلَـٰهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+      "transliteration": "Laa ilaaha illallaahu wahdahu laa shareeka lahu, lahul-mulku wa lahul-hamdu wa Huwa 'alaa kulli shay'in Qadeer",
+      "meaning_tamil": "அல்லாஹ்வைத் தவிர வேறு இறைவன் இல்லை. அவன் ஒருவனே, அவனுக்கு இணையே இல்லை.",
+      "meaning_english": "None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+      "target": 10,
+      "source": "Sahih al-Bukhari 6403"
+    },
+    {
+      "id": "istighfar",
+      "session": "general",
+      "arabic": "أَسْتَغْفِرُ اللَّهَ",
+      "transliteration": "Astaghfirullah",
+      "meaning_tamil": "அல்லாஹ்விடம் பாவமன்னிப்பு தேடுகிறேன்",
+      "meaning_english": "I seek forgiveness from Allah",
+      "target": 100,
+      "source": "Sahih Muslim 2702"
+    },
+    {
+      "id": "salawat",
+      "session": "general",
+      "arabic": "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ",
+      "transliteration": "Allahumma salli 'alaa Muhammadin wa 'alaa aali Muhammad",
+      "meaning_tamil": "அல்லாஹ்வே! முஹம்மத் ﷺ அவர்கள் மீதும் அவர்களின் குடும்பத்தார் மீதும் சலவாத் அனுப்புவாயாக",
+      "meaning_english": "O Allah, send blessings upon Muhammad ﷺ and upon the family of Muhammad",
+      "target": 10,
+      "source": "Sahih al-Bukhari 3370"
+    },
+    {
+      "id": "evening-muawwidhat",
+      "session": "evening",
+      "arabic": "قُلْ هُوَ اللَّهُ أَحَدٌ ، قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ، قُلْ أَعُوذُ بِرَبِّ النَّاسِ",
+      "transliteration": "Qul Huwallaahu Ahad, Qul A'oodhu bi Rabbil-Falaq, Qul A'oodhu bi Rabbin-Naas",
+      "meaning_tamil": "சூரா அல்-இக்லாஸ், சூரா அல்-பலக், சூரா அன்-நாஸ் (3 குல்கள்)",
+      "meaning_english": "Surah Al-Ikhlas, Surah Al-Falaq, Surah An-Naas (The 3 Quls)",
+      "target": 3,
+      "source": "Sunan Abu Dawud 5082"
+    }
+  ]
+}

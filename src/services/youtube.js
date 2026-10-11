@@ -25,6 +25,9 @@ async function fetchYT(endpoint, params = {}) {
   const cached = ytCache.get(cacheKey);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
 
+  // Check persistent storage for quick warm-up
+  const storageKey = `yt_cache_${endpoint}_${JSON.stringify(params)}`;
+
   try {
     const res = await fetch(url.toString());
     if (!res.ok) {
@@ -39,8 +42,27 @@ async function fetchYT(endpoint, params = {}) {
     }
     const data = await res.json();
     ytCache.set(cacheKey, { data, ts: Date.now() });
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ data, ts: Date.now() }));
+    } catch {
+      // ignore quota
+    }
     return data;
   } catch (err) {
+    // If network fails (e.g. airplane mode or offline), check persistent fallback cache
+    try {
+      const persisted = localStorage.getItem(storageKey);
+      if (persisted) {
+        const parsed = JSON.parse(persisted);
+        if (parsed?.data) {
+          ytCache.set(cacheKey, { data: parsed.data, ts: parsed.ts || Date.now() });
+          return parsed.data;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
     if (err.name === 'TypeError' && err.message.includes('fetch')) {
       throw new Error("Please check your internet connection and try again.");
     }

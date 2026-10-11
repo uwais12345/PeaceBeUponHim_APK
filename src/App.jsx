@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 // Providers
 import {
@@ -18,38 +19,37 @@ import Footer from './components/footer/Footer';
 import GlobalSearch from './components/search/GlobalSearch';
 // AuthModal removed — no login required
 
-// Pages
+import { Suspense, lazy } from 'react';
+// Pages — Home is statically imported so the initial route renders instantly
 import Home from './pages/Home';
-import {
-  QuranIndex,
-  QuranSurah
-} from './pages/Quran';
-import {
-  HadithIndex,
-  HadithCollection,
-  HadithCategoryDetail,
-  HadithSearchPage,
-  HadithBook
-} from './pages/Hadith';
-import Dua from './pages/Dua';
-import Dhikr from './pages/Dhikr';
-import Explore from './pages/Explore';
-import Library from './pages/Library';
-import About from './pages/About';
-import AfterSalah from './pages/AfterSalah';
-import Settings from './pages/Settings';
-import NearbyMasjids from './pages/NearbyMasjids';
-import Lessons from './pages/Lessons';
-import NamesOfAllah from './pages/NamesOfAllah';
 import WelcomeScreen from './components/WelcomeScreen';
-import QiblaPage from './pages/Qibla';
 
-// Scroll restoration
+// Secondary pages — code-split to dramatically shrink initial JS bundle and speed up launch
+const QuranIndex = lazy(() => import('./pages/Quran').then(m => ({ default: m.QuranIndex })));
+const QuranSurah = lazy(() => import('./pages/Quran').then(m => ({ default: m.QuranSurah })));
+const HadithIndex = lazy(() => import('./pages/Hadith').then(m => ({ default: m.HadithIndex })));
+const HadithCollection = lazy(() => import('./pages/Hadith').then(m => ({ default: m.HadithCollection })));
+const HadithCategoryDetail = lazy(() => import('./pages/Hadith').then(m => ({ default: m.HadithCategoryDetail })));
+const HadithSearchPage = lazy(() => import('./pages/Hadith').then(m => ({ default: m.HadithSearchPage })));
+const HadithBook = lazy(() => import('./pages/Hadith').then(m => ({ default: m.HadithBook })));
+const Dua = lazy(() => import('./pages/Dua'));
+const Dhikr = lazy(() => import('./pages/Dhikr'));
+const Explore = lazy(() => import('./pages/Explore'));
+const Library = lazy(() => import('./pages/Library'));
+const About = lazy(() => import('./pages/About'));
+const AfterSalah = lazy(() => import('./pages/AfterSalah'));
+const Settings = lazy(() => import('./pages/Settings'));
+const NearbyMasjids = lazy(() => import('./pages/NearbyMasjids'));
+const Lessons = lazy(() => import('./pages/Lessons'));
+const NamesOfAllah = lazy(() => import('./pages/NamesOfAllah'));
+const QiblaPage = lazy(() => import('./pages/Qibla'));
+
+// Scroll restoration — instant, smooth reset on page change without conflicting with CSS smooth scroll
 function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [pathname]);
 
   return null;
@@ -102,6 +102,11 @@ export default function App() {
     return sessionStorage.getItem('hasStarted') === 'true';
   });
 
+  useEffect(() => {
+    // Hide native Android splash as soon as React has hydrated
+    SplashScreen.hide().catch(() => {});
+  }, []);
+
   const startApp = () => {
     sessionStorage.setItem('hasStarted', 'true');
     setHasStarted(true);
@@ -118,21 +123,37 @@ export default function App() {
         <QuranAudioSettingsProvider>
           <BookmarkProvider>
             <SearchProvider>
-              {!hasStarted ? (
-                <WelcomeScreen onGetStarted={startApp} />
-              ) : (
-                <div className="app-container">
-                  <ScrollToTop />
-                  <Navbar />
-                  <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait">
+                {!hasStarted ? (
+                  <motion.div
+                    key="welcome-splash"
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeInOut' }}
+                    style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+                  >
+                    <WelcomeScreen onGetStarted={startApp} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="app-shell"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="app-container"
+                  >
+                    <ScrollToTop />
+                    <Navbar />
+                    <AnimatePresence mode="wait">
                     <motion.div
                       key={location.pathname}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.25, ease: 'easeOut' }}
-                      style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.12, ease: 'easeOut' }}
+                      style={{ flex: 1, display: 'flex', flexDirection: 'column', willChange: 'opacity' }}
                     >
+                    <Suspense fallback={null}>
                       <Routes location={location}>
                         <Route path="/" element={<Home />} />
                         <Route path="/quran" element={<QuranIndex />} />
@@ -168,13 +189,14 @@ export default function App() {
                           </main>
                         } />
                       </Routes>
+                    </Suspense>
                     </motion.div>
                   </AnimatePresence>
                   {location.pathname === '/' && <Footer />}
                   <GlobalSearch />
-
-                </div>
+                </motion.div>
               )}
+            </AnimatePresence>
             </SearchProvider>
           </BookmarkProvider>
         </QuranAudioSettingsProvider>

@@ -528,6 +528,12 @@ input:focus, textarea:focus, select:focus {
 
 .slide-up { animation: slide-up 300ms ease both; }
 
+/* fade-in class: used on page wrappers. Framer-motion handles page transitions,
+   so this is a lightweight fallback for any elements not wrapped in motion. */
+.fade-in {
+  animation: fade-in 200ms ease both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -662,12 +668,13 @@ button:active,
 .social-card:active,
 .card-hover:active,
 .quick-nav-card:active {
-  transform: scale(0.96) !important;
+  transform: scale(0.96);
   opacity: 0.8;
-  transition: transform 0.1s ease, opacity 0.1s ease !important;
 }
 
-/* Ensure smooth transition back */
-button, .btn, .btn-icon, .navbar-link, .bottom-nav-item, .social-card, .card-hover, .quick-nav-card {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+/* Color/background transitions for interactive elements.
+   Transform is intentionally omitted here so individual components
+   can define their own transform transitions without conflict. */
+button, .btn, .btn-icon, .navbar-link {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }

@@ -212,11 +212,13 @@ function CollectionDetail({ collectionId }) {
             }
 
             {/* Pagination */}
-            <div className="pagination">
-              <button className="page-btn" disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹ முந்தையது</button>
-              <span className="page-btn active">{page} பக்கம்</span>
-              <button className="page-btn" onClick={() => setPage(p => p + 1)}>அடுத்தது ›</button>
-            </div>
+            {!error && hadiths.length > 0 && (
+              <div className="pagination">
+                <button className="page-btn" disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹ முந்தையது</button>
+                <span className="page-btn active">{page} பக்கம்</span>
+                <button className="page-btn" onClick={() => setPage(p => p + 1)}>அடுத்தது ›</button>
+              </div>
+            )}
           </>
         )}
 
@@ -244,12 +246,14 @@ function CategoryDetail({ categoryId }) {
   const cat = HADITH_CATEGORIES.find(c => c.id === categoryId);
   const [hadiths, setHadiths] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { isBookmarked, toggle: toggleBookmark } = useBookmarks();
   const copyHadith = (h) => { navigator.clipboard.writeText(`[${h.id}] \n${h.arab}\n\n${h.translation}`); };
 
   useEffect(() => {
     if (!cat) return;
     setLoading(true);
+    setError(null);
     // Fetch a large chunk of Bukhari to search through
     getHadiths('bukhari', { page: 1, limit: 2000 })
       .then(data => {
@@ -289,6 +293,7 @@ function CategoryDetail({ categoryId }) {
 
         setHadiths(results);
       })
+      .catch(e => setError(parseError(e, 'Hadiths')))
       .finally(() => setLoading(false));
   }, [categoryId, cat]);
 
@@ -310,9 +315,20 @@ function CategoryDetail({ categoryId }) {
           </div>
         </div>
 
+        {error && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <FriendlyError 
+              title={error.title} 
+              message={error.message} 
+              icon={error.icon} 
+              onRetry={() => window.location.reload()} 
+            />
+          </div>
+        )}
+
         {loading ? (
           <div className="hadiths-list">{Array(3).fill(0).map((_, i) => <HadithSkeleton key={i} />)}</div>
-        ) : hadiths.length > 0 ? (
+        ) : !error && hadiths.length > 0 ? (
           <div className="hadiths-list">
             {hadiths.map((hadith, i) => {
               const bk = isBookmarked('hadith', `bukhari-${hadith.number}`);
@@ -359,12 +375,12 @@ function CategoryDetail({ categoryId }) {
               );
             })}
           </div>
-        ) : (
+        ) : !error ? (
           <div className="empty-state">
             <p className="empty-state-title">No specific hadiths found</p>
             <p className="empty-state-desc">Try browsing the main collections instead.</p>
           </div>
-        )}
+        ) : null}
       </div>
     </main>
   );
@@ -377,11 +393,13 @@ function HadithSearch() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [error, setError] = useState(null);
 
   const doSearch = useCallback(async () => {
     if (!query.trim() || !collection) return;
     setLoading(true);
     setSearched(true);
+    setError(null);
     try {
       const data = await getHadiths(collection, { page: 1, limit: 50 });
       const q = query.toLowerCase();
@@ -393,8 +411,9 @@ function HadithSearch() {
         h.engTranslation?.toLowerCase().includes(q)
       );
       setResults(filtered);
-    } catch {
+    } catch (e) {
       setResults([]);
+      setError(parseError(e, 'Hadiths'));
     } finally {
       setLoading(false);
     }
@@ -435,7 +454,18 @@ function HadithSearch() {
           </div>
         </div>
 
-        {searched && !loading && (
+        {error && (
+          <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+            <FriendlyError 
+              title={error.title} 
+              message={error.message} 
+              icon={error.icon} 
+              onRetry={doSearch} 
+            />
+          </div>
+        )}
+
+        {searched && !loading && !error && (
           <p className="search-result-count">
             {results.length} result{results.length !== 1 ? 's' : ''} in {COLLECTIONS.find(c => c.id === collection)?.name}
           </p>
@@ -459,7 +489,7 @@ function HadithSearch() {
           ))}
         </div>
 
-        {searched && results.length === 0 && !loading && (
+        {searched && results.length === 0 && !loading && !error && (
           <div className="empty-state">
             <Search size={40} className="empty-state-icon" />
             <p className="empty-state-title tamil-text" style={{ fontFamily: 'var(--font-tamil)' }}>முடிவுகள் எதுவும் இல்லை</p>

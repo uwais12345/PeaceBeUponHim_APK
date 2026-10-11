@@ -122,6 +122,17 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
+          // Precache all bundled Quran JSON files so they are available offline
+          // immediately after PWA installation (no prior visit needed)
+          globPatterns: [
+            '**/*.{js,css,html,svg,png,jpg,ico,woff,woff2}',
+            'api/quran/chapters.json',
+            'api/quran/*.json',
+            'api/duas.json',
+            'api/dhikr.json',
+          ],
+          // Large JSON files — increase size limit from default 2MB
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/api\.quran\.com\/.*/i,
@@ -135,18 +146,8 @@ export default defineConfig(({ mode }) => {
                 cacheableResponse: { statuses: [0, 200] }
               }
             },
-            {
-              urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'hadith-api-cache',
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-                },
-                cacheableResponse: { statuses: [0, 200] }
-              }
-            }
+            // Note: Hadith (cdn.jsdelivr.net) is intentionally NOT cached here.
+            // Hadith is online-only; offline will show a "requires internet" message.
           ]
         }
       })

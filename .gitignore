@@ -30,3 +30,8 @@ dist-ssr
 
 # Ignore prompt files
 [Pp]rompt.md
+
+# Android build outputs and APKs
+*.apk
+android/app/build/
+.gradle/

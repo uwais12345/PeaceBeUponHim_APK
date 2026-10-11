@@ -6,7 +6,7 @@ export default function WelcomeScreen({ onGetStarted }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onGetStarted();
-    }, 5000);
+    }, 1800);
     return () => clearTimeout(timer);
   }, [onGetStarted]);
 
@@ -24,7 +24,12 @@ export default function WelcomeScreen({ onGetStarted }) {
         </div>
         <h1 id="welcome-title">Assalamu Alaikum!</h1>
         <p>Your Muslim Lifestyle Companion</p>
-        <button type="button" className="welcome-start">
+        <button
+          type="button"
+          className="welcome-start"
+          onClick={onGetStarted}
+          aria-label="Continue to Home"
+        >
           <span className="welcome-spinner" /> Loading...
         </button>
         <div className="welcome-home-indicator" aria-hidden="true">

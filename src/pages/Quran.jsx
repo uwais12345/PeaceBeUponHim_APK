@@ -48,6 +48,7 @@ function SurahList() {
       .then(data => { setSurahs(data); setFiltered(data); })
       .catch(e => setError(parseError(e, 'Quran Surahs')))
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -209,7 +210,8 @@ function SurahDetail({ surahId }) {
     setIsPlaying(false);
     setAudioError('');
     setAudioLoading(true);
-    audioRef.current?.pause();
+    const audioEl = audioRef.current;
+    audioEl?.pause();
     getSurahAyahAudio(surahId, selectedReciterId)
       .then(tracks => { if (!cancelled) setAudioTracks(tracks); })
       .catch(e => {
@@ -221,7 +223,7 @@ function SurahDetail({ surahId }) {
 
     return () => {
       cancelled = true;
-      audioRef.current?.pause();
+      audioEl?.pause();
     };
   }, [surahId, selectedReciterId]);
 

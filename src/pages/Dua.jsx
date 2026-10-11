@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Bookmark, Copy, Share2, Filter, Heart, Loader2 } from 'lucide-react';
 import { fetchDuasData, searchDuas } from '../services/dua';
@@ -17,27 +17,52 @@ export default function Dua() {
   const [query, setQuery] = useState(queryParam);
   const { isBookmarked, toggle: toggleBookmark } = useBookmarks();
 
-  const [duas, setDuas] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [duas, setDuas] = useState(() => {
+    try {
+      const persisted = localStorage.getItem('pbuh_duas_cache');
+      return persisted ? JSON.parse(persisted).duas || [] : [];
+    } catch {
+      return [];
+    }
+  });
+  const [categories, setCategories] = useState(() => {
+    try {
+      const persisted = localStorage.getItem('pbuh_duas_cache');
+      return persisted ? JSON.parse(persisted).categories || [] : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !localStorage.getItem('pbuh_duas_cache');
+    } catch {
+      return true;
+    }
+  });
   const [error, setError] = useState(null);
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
     async function loadData() {
-      setLoading(true);
+      if (!duas.length) setLoading(true);
       setError(null);
       try {
         const data = await fetchDuasData();
         setDuas(data.duas || []);
         setCategories(data.categories || []);
+        hasFetched.current = true;
       } catch (err) {
-        setError(parseError(err, 'Duas'));
+        if (!duas.length) setError(parseError(err, 'Duas'));
       } finally {
         setLoading(false);
       }
     }
     loadData();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once — data is from bundled static asset, no need to re-fetch
 
   // Filter logic
   const filteredDuas = useMemo(() => {

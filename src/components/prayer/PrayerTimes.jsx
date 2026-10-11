@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Clock, MapPin, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Clock, MapPin } from 'lucide-react';
 import FriendlyError from '../ui/FriendlyError';
 import { parseError } from '../../utils/errorHandling';
 import masjidBg from '../../assets/masjid-banner.svg';
@@ -58,13 +58,33 @@ export default function PrayerTimes() {
   const [district, setDistrict] = useState(
     () => localStorage.getItem('prayer-district') || 'Chennai'
   );
-  const [timings, setTimings]       = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
+  const [timings, setTimings] = useState(() => {
+    try {
+      const savedDistrict = localStorage.getItem('prayer-district') || 'Chennai';
+      const cached = localStorage.getItem(`prayer-timings-${savedDistrict}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const savedDistrict = localStorage.getItem('prayer-district') || 'Chennai';
+      return !localStorage.getItem(`prayer-timings-${savedDistrict}`);
+    } catch {
+      return true;
+    }
+  });
+  const [error, setError] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  // Stable ref so fetchPrayerTimes doesn't need `timings` in its deps
+  const timingsRef = useRef(timings);
+  useEffect(() => { timingsRef.current = timings; }, [timings]);
+
+  // Stable fetch — only re-created when `district` changes, not when timings change
   const fetchPrayerTimes = useCallback(async (isRetry = false) => {
-    setLoading(true);
+    if (!timingsRef.current) setLoading(true);
     if (!isRetry) setError(null);
     try {
       const res = await fetch(
@@ -72,15 +92,24 @@ export default function PrayerTimes() {
       );
       if (!res.ok) throw new Error('Failed to fetch prayer times');
       const data = await res.json();
-      setTimings(data.data.timings);
-      setError(null);
-      localStorage.setItem('prayer-district', district);
+      if (data?.data?.timings) {
+        setTimings(data.data.timings);
+        setError(null);
+        localStorage.setItem('prayer-district', district);
+        try {
+          localStorage.setItem(`prayer-timings-${district}`, JSON.stringify(data.data.timings));
+        } catch {
+          // ignore quota
+        }
+      }
     } catch (err) {
-      setError(parseError(err, 'prayer times'));
+      if (!timingsRef.current) {
+        setError(parseError(err, 'prayer times'));
+      }
     } finally {
       setLoading(false);
     }
-  }, [district]);
+  }, [district]); // Only district — timings accessed via ref
 
   useEffect(() => {
     fetchPrayerTimes();

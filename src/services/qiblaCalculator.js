@@ -43,22 +43,49 @@ export function calculateQiblaBearing(userLat, userLon) {
 }
 
 /**
+ * Estimate magnetic declination (in degrees) for a given location.
+ * Positive = East, Negative = West.
+ * Uses the geomagnetic dipole model approximation.
+ */
+export function estimateMagneticDeclination(lat, lon) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return 0;
+  // Approximate geomagnetic North Pole coordinates (recent WMM epoch)
+  const POLE_LAT = 86.5;
+  const POLE_LON = 164.0;
+
+  const φ1 = toRad(lat);
+  const φ2 = toRad(POLE_LAT);
+  const Δλ = toRad(POLE_LON - lon);
+
+  const y = Math.cos(φ2) * Math.sin(Δλ);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+
+  const declination = toDeg(Math.atan2(y, x));
+  return shortestAngleDifference(0, declination);
+}
+
+/**
  * Calculate the shortest turn direction from current heading to target.
  * Handles 0°/360° wrap-around correctly.
  *
  * @param {number} heading   — current device heading [0, 360)
  * @param {number} bearing   — target Qibla bearing [0, 360)
- * @returns {{ direction: 'left'|'right'|'aligned', degrees: number }}
+ * @returns {{ direction: 'clockwise'|'anticlockwise'|'aligned', degrees: number, diff: number }}
  */
 export function calculateTurnDirection(heading, bearing, alignedThreshold = 5) {
-  const diff = shortestAngleDifference(heading, bearing);
+  const normHeading = normalizeBearing(heading);
+  const normBearing = normalizeBearing(bearing);
+  const diff = shortestAngleDifference(normHeading, normBearing);
   const absDiff = Math.abs(diff);
 
-  if (absDiff <= alignedThreshold) return { direction: 'aligned', degrees: absDiff };
+  if (absDiff <= alignedThreshold) {
+    return { direction: 'aligned', degrees: absDiff, diff };
+  }
 
   return {
-    direction: diff < 0 ? 'left' : 'right',
+    direction: diff > 0 ? 'clockwise' : 'anticlockwise',
     degrees: absDiff,
+    diff,
   };
 }
 
