@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <!-- Drop Shadow for Realistic 3D Beads -->
+    <filter id="tasbihShadow" x="-15%" y="-15%" width="130%" height="135%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2.2" stdDeviation="1.8" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+
+    <!-- Emerald Gemstone Bead Radial Gradient -->
+    <radialGradient id="emeraldBead" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3dd18b" />
+      <stop offset="35%" stop-color="#196340" />
+      <stop offset="75%" stop-color="#0f3c26" />
+      <stop offset="100%" stop-color="#051c11" />
+    </radialGradient>
+
+    <!-- Gold Accent Bead Radial Gradient -->
+    <radialGradient id="goldBead" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fff5cf" />
+      <stop offset="40%" stop-color="#e8bd5f" />
+      <stop offset="80%" stop-color="#c1912d" />
+      <stop offset="100%" stop-color="#805b14" />
+    </radialGradient>
+
+    <!-- Minaret / Imam Carved Gold Gradient -->
+    <linearGradient id="imamGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff3c2" />
+      <stop offset="30%" stop-color="#ebb959" />
+      <stop offset="70%" stop-color="#c1902a" />
+      <stop offset="100%" stop-color="#f5d47e" />
+    </linearGradient>
+
+    <!-- Silk Tassel Gradient -->
+    <linearGradient id="tasselGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f7dc88" />
+      <stop offset="50%" stop-color="#d49e2b" />
+      <stop offset="100%" stop-color="#8a5c10" />
+    </linearGradient>
+
+    <!-- Central Emblem Gradient: Emerald Tile -->
+    <linearGradient id="centerTile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#154930" />
+      <stop offset="100%" stop-color="#082215" />
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#tasbihShadow)">
+    <!-- Silk Cord Path connecting the beads -->
+    <ellipse cx="32" cy="27" rx="19" ry="17" stroke="#b38728" stroke-width="0.8" opacity="0.6" stroke-dasharray="1 1.2" />
+
+    <!-- Center Medallion Plate (Soft backdrop giving substantial weight like a book) -->
+    <path d="M32 15 C37 15 41 19 41 24 C41 29 37 33 32 33 C27 33 23 29 23 24 C23 19 27 15 32 15 Z" fill="url(#centerTile)" stroke="url(#imamGold)" stroke-width="0.8" opacity="0.9" />
+    <!-- Arabesque 8-point Star in center of Tasbih -->
+    <g transform="translate(32, 24) scale(0.65)" fill="none" stroke="url(#imamGold)" stroke-width="1.2">
+      <rect x="-6" y="-6" width="12" height="12" rx="1.2" stroke="url(#imamGold)" stroke-width="1.2" />
+      <rect x="-6" y="-6" width="12" height="12" rx="1.2" transform="rotate(45)" stroke="url(#imamGold)" stroke-width="1.2" />
+      <circle cx="0" cy="0" r="2.2" fill="url(#goldBead)" stroke="none" />
+    </g>
+
+    <!-- LOOP OF 33 GEMSTONE BEADS -->
+    <!-- Top row -->
+    <circle cx="32" cy="10" r="3" fill="url(#goldBead)" />
+    <circle cx="37.5" cy="10.8" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="42.8" cy="12.8" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="47.2" cy="16.2" r="2.7" fill="url(#emeraldBead)" />
+    
+    <!-- Right side -->
+    <circle cx="50" cy="21" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="51" cy="26.5" r="2.8" fill="url(#goldBead)" /> <!-- 11th divider bead -->
+    <circle cx="50.2" cy="32" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="47.5" cy="37" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="43.2" cy="41" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="38" cy="43.5" r="2.7" fill="url(#emeraldBead)" />
+
+    <!-- Left side -->
+    <circle cx="26.5" cy="10.8" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="21.2" cy="12.8" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="16.8" cy="16.2" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="14" cy="21" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="13" cy="26.5" r="2.8" fill="url(#goldBead)" /> <!-- 22nd divider bead -->
+    <circle cx="13.8" cy="32" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="16.5" cy="37" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="20.8" cy="41" r="2.7" fill="url(#emeraldBead)" />
+    <circle cx="26" cy="43.5" r="2.7" fill="url(#emeraldBead)" />
+
+    <!-- Joint beads approaching Minaret -->
+    <circle cx="29.5" cy="44.8" r="2.5" fill="url(#emeraldBead)" />
+    <circle cx="34.5" cy="44.8" r="2.5" fill="url(#emeraldBead)" />
+
+    <!-- Carved Gold Imam / Minaret Top Joint Bead -->
+    <path d="M30 45.5 H34 L33.5 48.5 H30.5 Z" fill="url(#imamGold)" />
+    <circle cx="32" cy="49.5" r="2.5" fill="url(#goldBead)" />
+    <!-- Tapered Minaret Spire -->
+    <path d="M30.5 50.5 L31 54.5 L32 55.5 L33 54.5 L33.5 50.5 Z" fill="url(#imamGold)" />
+
+    <!-- Silk Cord Wrap -->
+    <rect x="30.8" y="55" width="2.4" height="1.2" rx="0.5" fill="#fcf0be" />
+
+    <!-- Flowing Golden Silk Tassel -->
+    <path d="M31.2 56.2 C30 58.5, 29 60.5, 29.5 62 L32 60 L34.5 62 C35 60.5, 34 58.5, 32.8 56.2 Z" fill="url(#tasselGrad)" />
+    <!-- Fine Tassel Fringe Strands -->
+    <line x1="30.2" y1="57" x2="29.5" y2="62" stroke="#fff1bd" stroke-width="0.4" opacity="0.7" />
+    <line x1="32" y1="57" x2="32" y2="61" stroke="#fff1bd" stroke-width="0.4" opacity="0.7" />
+    <line x1="33.8" y1="57" x2="34.5" y2="62" stroke="#fff1bd" stroke-width="0.4" opacity="0.7" />
+  </g>
+</svg>

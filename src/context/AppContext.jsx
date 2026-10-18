@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { TRANSLATIONS, LANGUAGES } from '../i18n/translations';
 import { QURAN_RECITERS } from '../services/quran';
 
@@ -19,8 +19,10 @@ export function LanguageProvider({ children }) {
 
   const t = useCallback((key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS.en?.[key] || key, [lang]);
 
+  const value = useMemo(() => ({ lang, setLang, t, languages: LANGUAGES }), [lang, t]);
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, languages: LANGUAGES }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
@@ -41,7 +43,7 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem('theme');
     if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'light';
   });
 
   // Resolve the effective data-theme value
@@ -73,7 +75,9 @@ export function ThemeProvider({ children }) {
     setTheme(t => t === 'dark' ? 'light' : 'dark');
   }, []);
 
-  return <ThemeContext.Provider value={{ theme, toggle, setTheme }}>{children}</ThemeContext.Provider>;
+  const value = useMemo(() => ({ theme, toggle, setTheme }), [theme, toggle]);
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export const useTheme = () => {
@@ -102,8 +106,10 @@ export function QuranAudioSettingsProvider({ children }) {
     localStorage.setItem('quran_reciter', reciterId);
   }, [reciterId]);
 
+  const value = useMemo(() => ({ reciterId, setReciterId }), [reciterId]);
+
   return (
-    <QuranAudioSettingsContext.Provider value={{ reciterId, setReciterId }}>
+    <QuranAudioSettingsContext.Provider value={value}>
       {children}
     </QuranAudioSettingsContext.Provider>
   );
@@ -148,11 +154,13 @@ export function BookmarkProvider({ children }) {
   const toggle = useCallback((item) => {
     setBookmarks(prev => {
       const exists = prev.some(b => b.type === item.type && b.id === String(item.id));
+      const lang = localStorage.getItem('app-lang') || 'ta';
+      const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
       if (exists) {
-        showToast('Bookmark removed');
+        showToast(T.bookmark === 'சேமி' ? 'நீக்கப்பட்டது' : lang === 'ar' ? 'تم الحذف' : 'Bookmark removed');
         return prev.filter(b => !(b.type === item.type && b.id === String(item.id)));
       } else {
-        showToast('Saved to library');
+        showToast(lang === 'ta' ? 'நூலகத்தில் சேமிக்கப்பட்டது' : lang === 'ar' ? 'تم الحفظ في المكتبة' : 'Saved to library');
         return [...prev, { ...item, id: String(item.id), savedAt: new Date().toISOString() }];
       }
     });
@@ -160,11 +168,17 @@ export function BookmarkProvider({ children }) {
 
   const remove = useCallback((type, id) => {
     setBookmarks(prev => prev.filter(b => !(b.type === type && b.id === String(id))));
-    showToast('Removed from library');
+    const lang = localStorage.getItem('app-lang') || 'ta';
+    const msg = lang === 'ta' ? 'நூலகத்திலிருந்து நீக்கப்பட்டது' : lang === 'ar' ? 'تم الإزالة من المكتبة' : 'Removed from library';
+    showToast(msg);
   }, [showToast]);
 
+  const value = useMemo(() => ({
+    bookmarks, isBookmarked, toggle, remove
+  }), [bookmarks, isBookmarked, toggle, remove]);
+
   return (
-    <BookmarkContext.Provider value={{ bookmarks, isBookmarked, toggle, remove }}>
+    <BookmarkContext.Provider value={value}>
       {children}
       {toastMsg && (
         <div className="toast-container">
@@ -197,12 +211,26 @@ export function SearchProvider({ children }) {
       }
       if (e.key === 'Escape') setIsOpen(false);
     };
+    const backHandler = (e) => {
+      if (isOpen) {
+        e.preventDefault();
+        setIsOpen(false);
+      }
+    };
     document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, []);
+    window.addEventListener('pbuh:back', backHandler);
+    return () => {
+      document.removeEventListener('keydown', handler);
+      window.removeEventListener('pbuh:back', backHandler);
+    };
+  }, [isOpen]);
+
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const value = useMemo(() => ({ isOpen, open, close }), [isOpen, open, close]);
 
   return (
-    <SearchContext.Provider value={{ isOpen, open: () => setIsOpen(true), close: () => setIsOpen(false) }}>
+    <SearchContext.Provider value={value}>
       {children}
     </SearchContext.Provider>
   );

@@ -1,251 +1,632 @@
+/* ================================================================
+   SETTINGS PAGE — EXACT CLEAN MINIMALIST iOS DESIGN
+   Pure White Cards • Large Rounded Corners • Typography First
+   iOS-Style Centered Small Dropdown Menu • iOS Toggle Switches
+   ================================================================ */
+
 .settings-page {
   min-height: 100vh;
   min-height: 100dvh;
-  padding: calc(var(--navbar-total) + var(--space-4)) 0 calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
+  background-color: #f2f2f7;
+  padding: calc(var(--navbar-total) + 12px) 18px calc(110px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
 }
 
-.settings-page > .container {
-  max-width: 800px;
+.settings-shell {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.settings-header {
-  margin-bottom: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background:
-    linear-gradient(115deg, color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card)), var(--color-bg-card) 72%);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-}
-
-.settings-heading-copy {
-  min-width: 0;
-}
-
-.settings-title {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-size: 1.3rem;
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.025em;
-  line-height: 1.25;
-}
-
-.settings-desc {
-  margin: 3px 0 0;
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
-}
-
-.settings-card {
-  margin-bottom: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-card);
-}
-
-.settings-card-header {
+/* ────────────────────────────────────────────────────────────────
+   TOP BACK ARROW & TITLE
+──────────────────────────────────────────────────────────────── */
+.settings-top-nav {
   display: flex;
   align-items: center;
-  margin-bottom: var(--space-3);
+  margin-bottom: 8px;
 }
 
-.settings-card-title {
-  margin: 0 0 2px;
-  color: var(--color-text-primary);
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-snug);
-}
-
-.settings-card-subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--text-xs);
-  line-height: var(--leading-snug);
-}
-
-.reciter-select-label {
-  display: block;
-  margin-bottom: var(--space-1);
-  color: var(--color-text-primary);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-}
-
-.reciter-note {
-  margin-top: var(--space-2);
-}
-
-.settings-profile-form { display: grid; grid-template-columns: minmax(0, 1fr) 88px auto; gap: var(--space-2); }
-.settings-profile-input { min-width: 0; padding: 9px 10px; color: var(--color-text-primary); background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); }
-.settings-history-row { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: var(--text-xs); }
-.settings-clear-history { padding: 4px; color: var(--color-error); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
-
-.lang-grid,
-.theme-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-2);
-}
-
-.lang-btn,
-.theme-btn {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
+.settings-back-arrow-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 10px 12px;
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  margin-left: -8px;
+  background: transparent;
+  border: none;
+  color: #111111;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  padding: 0;
+}
+
+.settings-back-arrow-btn:active {
+  opacity: 0.5;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.settings-main-title {
+  margin: 0 0 22px 2px;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #000000;
+  line-height: 1.15;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SECTION GROUPS & HEADINGS
+──────────────────────────────────────────────────────────────── */
+.settings-group-wrap {
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-group-heading {
+  margin: 0 0 10px 4px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #111111;
+}
+
+/* The Inset Group Card */
+.settings-card-group {
+  background: #ffffff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CARD ROWS
+──────────────────────────────────────────────────────────────── */
+.settings-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f2f2f5;
   cursor: pointer;
   text-align: start;
-  transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.12s ease;
+  gap: 12px;
 }
 
-.lang-btn:hover,
-.theme-btn:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 48%, var(--color-border));
+.settings-card-row:last-child {
+  border-bottom: none;
 }
 
-.lang-btn.active,
-.theme-btn.active {
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card));
-  border-color: color-mix(in srgb, var(--color-primary) 66%, var(--color-border));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 18%, transparent);
+.settings-card-row:active {
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
-.lang-btn:focus-visible,
-.theme-btn:focus-visible {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
+.settings-row-static {
+  cursor: default;
 }
 
-.lang-native,
-.lang-label {
-  display: block;
+.settings-row-static:active {
+  background-color: transparent;
+}
+
+.settings-row-label {
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #1c1c1e;
+  letter-spacing: -0.01em;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-row-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-row-subtext {
+  font-size: 12px;
+  color: #8e8e93;
+  line-height: 1.35;
+}
+
+.settings-row-value-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.settings-row-value {
+  font-size: 14.5px;
+  color: #8e8e93;
+  letter-spacing: -0.01em;
+}
+
+.settings-truncate-val {
+  max-width: 145px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.lang-native {
-  color: var(--color-text-primary);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+.settings-green-val {
+  color: #34c759;
+  font-weight: 500;
 }
 
-.lang-label {
-  margin-top: 2px;
-  color: var(--color-text-secondary);
-  font-size: 0.68rem;
+.settings-row-chevron {
+  color: #c7c7cc;
+  flex-shrink: 0;
 }
 
-.theme-btn {
-  min-height: 44px;
-  padding-inline: 14px;
+/* ────────────────────────────────────────────────────────────────
+   iOS TOGGLE SWITCH
+──────────────────────────────────────────────────────────────── */
+.ios-switch {
+  width: 51px;
+  height: 31px;
+  border-radius: 999px;
+  background-color: #e9e9ea;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.theme-btn-label {
-  color: var(--color-text-primary);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
+.ios-switch.is-on {
+  background-color: #34c759;
 }
 
-.settings-info-card {
+.ios-switch-thumb {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block;
+}
+
+.ios-switch.is-on .ios-switch-thumb {
+  transform: translateX(20px);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SOLID BOTTOM BUTTON & DISCLAIMER
+──────────────────────────────────────────────────────────────── */
+.settings-bottom-section {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-solid-btn {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 14px;
+  background: var(--color-primary, #1a6b3a);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  color: var(--color-text-secondary);
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-secondary));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, var(--color-border));
-  border-radius: 12px;
-  font-size: var(--text-xs);
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.12s ease, background-color 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.settings-solid-btn.is-danger {
+  background: var(--btn-danger-bg, #c0392b);
+}
+
+.settings-solid-btn:active {
+  opacity: 0.85;
+  transform: scale(0.985);
+}
+
+.settings-bottom-disclaimer {
+  margin: 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: #8e8e93;
+  line-height: 1.45;
+  padding: 0 12px;
+}
+
+.settings-disclaimer-link {
+  background: transparent;
+  border: none;
+  color: #007aff;
+  font-size: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   COMPACT iOS-STYLE CENTERED DROPDOWN MENU
+   Small Size • Center Aligned • Pure Apple Context Menu Feel
+──────────────────────────────────────────────────────────────── */
+.ios-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  box-sizing: border-box;
+  animation: ios-menu-fade-in 0.18s ease-out both;
+}
+
+.ios-menu-modal {
+  width: 100%;
+  max-width: 290px;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  animation: ios-menu-scale-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.ios-menu-header {
+  padding: 14px 16px 12px;
+  text-align: center;
+  border-bottom: 1px solid #efeff2;
+  background: #fafafc;
+}
+
+.ios-menu-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: block;
+}
+
+.ios-menu-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ios-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 44px;
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f2f2f5;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ios-menu-item:last-child {
+  border-bottom: none;
+}
+
+.ios-menu-item:active {
+  background-color: #f2f2f7;
+}
+
+.ios-menu-item.is-selected {
+  background-color: rgba(26, 107, 58, 0.06);
+}
+
+.ios-menu-item-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111111;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.ios-menu-item.is-selected .ios-menu-item-text {
+  font-weight: 600;
+  color: #1a6b3a;
+}
+
+.ios-menu-check {
+  position: absolute;
+  right: 16px;
+  color: #1a6b3a;
+}
+
+.ios-menu-cancel-row {
+  height: 44px;
+  border: none;
+  border-top: 1px solid #efeff2;
+  background: #fafafc;
+  font-size: 15px;
+  font-weight: 600;
+  color: #007aff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.12s ease;
+}
+
+.ios-menu-cancel-row:active {
+  background: #f2f2f7;
+}
+
+/* Clear History Confirmation */
+.ios-menu-clear-box {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   text-align: center;
 }
 
-@media (max-width: 520px) {
-  .settings-page {
-    padding-top: calc(var(--navbar-height) + var(--space-3));
+.ios-menu-clear-text {
+  margin: 0;
+  font-size: 14px;
+  color: #1c1c1e;
+  line-height: 1.4;
+}
+
+.ios-menu-clear-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ios-menu-clear-btn {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 10px;
+  background: var(--btn-danger-bg, #c0392b);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.ios-menu-clear-btn:active {
+  opacity: 0.85;
+}
+
+.ios-menu-cancel-btn {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 10px;
+  background: var(--color-bg-secondary, #f2f2f7);
+  color: var(--color-text-primary, #1c1c1e);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--color-border, #e5e0d8);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.ios-menu-cancel-btn:active {
+  opacity: 0.85;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   FLOATING MICRO-TOAST
+──────────────────────────────────────────────────────────────── */
+.settings-toast-indicator {
+  position: fixed;
+  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18, 18, 20, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 10050;
+  animation: settings-pop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes ios-menu-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ios-menu-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
   }
-
-  .settings-page > .container {
-    padding-inline: var(--space-3);
-  }
-
-  .settings-header {
-    margin-bottom: var(--space-2);
-    padding: var(--space-3);
-    border-radius: 14px;
-  }
-
-  .settings-title {
-    font-size: 1.15rem;
-  }
-
-  .settings-desc {
-    font-size: var(--text-xs);
-  }
-
-  .settings-card {
-    margin-bottom: var(--space-2);
-    padding: var(--space-3);
-    border-radius: 14px;
-  }
-
-  .settings-card-header {
-    margin-bottom: var(--space-3);
-  }
-
-  .lang-grid,
-  .theme-grid {
-    gap: 6px;
-  }
-
-  .lang-btn {
-    min-height: 48px;
-    padding: 8px 7px;
-  }
-
-  .lang-native {
-    font-size: 0.7rem;
-  }
-
-  .lang-label {
-    display: none;
-  }
-
-  .theme-btn {
-    min-height: 42px;
-    justify-content: center;
-    padding-inline: 6px;
-  }
-
-  .theme-btn-label {
-    font-size: 0.7rem;
-  }
-
-  .settings-profile-form { grid-template-columns: 1fr 74px; }
-  .settings-profile-form .btn { grid-column: 1 / -1; justify-content: center; }
-
-  .settings-info-card {
-    margin-top: var(--space-1);
-    padding: var(--space-2) var(--space-3);
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .lang-btn,
-  .theme-btn {
-    transition: none;
-  }
+@keyframes settings-pop {
+  from { opacity: 0; transform: translate(-50%, 10px) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DARK THEME (Sleek Apple Dark Mode)
+──────────────────────────────────────────────────────────────── */
+[data-theme='dark'] .settings-page {
+  background-color: #000000;
+}
+
+[data-theme='dark'] .settings-back-arrow-btn {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .settings-main-title {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .settings-group-heading {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .settings-card-group {
+  background: #1c1c1e;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .settings-card-row {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .settings-card-row:active {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .settings-row-label {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .settings-row-subtext {
+  color: #8e8e93;
+}
+
+[data-theme='dark'] .settings-row-value {
+  color: #8e8e93;
+}
+
+[data-theme='dark'] .settings-row-chevron {
+  color: #545458;
+}
+
+[data-theme='dark'] .ios-switch {
+  background-color: #39393d;
+}
+
+[data-theme='dark'] .ios-switch.is-on {
+  background-color: #34c759;
+}
+
+[data-theme='dark'] .settings-solid-btn {
+  background: var(--color-primary, #3dab68);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .settings-solid-btn.is-danger {
+  background: var(--btn-danger-bg, #c0392b);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .ios-menu-cancel-btn {
+  background: #2a2a2e;
+  color: #f0ede8;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark Modal */
+[data-theme='dark'] .ios-menu-modal {
+  background: #252528;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+}
+
+[data-theme='dark'] .ios-menu-header {
+  background: #202022;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .ios-menu-title {
+  color: #8e8e93;
+}
+
+[data-theme='dark'] .ios-menu-item {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .ios-menu-item:active {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .ios-menu-item.is-selected {
+  background-color: rgba(45, 138, 82, 0.22);
+}
+
+[data-theme='dark'] .ios-menu-item-text {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .ios-menu-item.is-selected .ios-menu-item-text {
+  color: #34c759;
+}
+
+[data-theme='dark'] .ios-menu-check {
+  color: #34c759;
+}
+
+[data-theme='dark'] .ios-menu-cancel-row {
+  background: #202022;
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: #0a84ff;
+}
+
+[data-theme='dark'] .ios-menu-cancel-row:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .ios-menu-clear-text {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .ios-menu-cancel-btn {
+  background: #39393d;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .settings-toast-indicator {
+  background: #ffffff;
+  color: #000000;
 }

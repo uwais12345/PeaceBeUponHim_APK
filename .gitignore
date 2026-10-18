@@ -35,3 +35,7 @@ dist-ssr
 *.apk
 android/app/build/
 .gradle/
+
+# Scratch & temporary backups
+scratch/
+public/reciters/original_backup/

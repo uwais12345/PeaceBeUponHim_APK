@@ -82,6 +82,7 @@ async function fetchWithCache(url) {
 export const QURAN_RECITERS = [
   { id: 7, name: 'Mishari Rashid al-Afasy' },
   { id: 3, name: 'Abdur-Rahman as-Sudais' },
+  { id: 9, name: 'Muhammad Siddiq Al-Minshawi' },
   { id: 2, name: 'AbdulBaset AbdulSamad' },
   { id: 4, name: 'Abu Bakr al-Shatri' },
   { id: 'bandar-baleela', name: 'Bandar Baleela' },

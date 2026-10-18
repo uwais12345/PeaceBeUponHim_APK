@@ -1,13 +1,17 @@
 // ============================================
 // YOUTUBE SERVICE
-// All API calls handled server-side via proxy
-// to avoid exposing API key in browser
+// In Capacitor (Android APK): calls YouTube API directly using VITE_YOUTUBE_API_KEY
+// In web/Vercel deployment: routes through /api/youtube server-side proxy
 // ============================================
 
-// Proxy endpoint — API key stays server-side
-const PROXY = '/api/youtube';
 const CHANNEL_ID = import.meta.env.VITE_YOUTUBE_CHANNEL_ID;
+const DIRECT_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+const YT_BASE = 'https://www.googleapis.com/youtube/v3';
+const PROXY = '/api/youtube';
 
+import { fetchWithRetry } from './networkManager.js';
+
+// isConfigured: true if we have at least a channel ID
 export const isConfigured = !!CHANNEL_ID;
 
 const ytCache = new Map();
@@ -16,27 +20,39 @@ const CACHE_TTL = 15 * 60 * 1000;
 async function fetchYT(endpoint, params = {}) {
   if (!isConfigured) throw new Error('YouTube channel ID not configured');
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || window.location.origin;
-  const url = new URL(PROXY, baseUrl);
-  url.searchParams.set('endpoint', endpoint);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-
-  const cacheKey = url.toString();
+  const cacheKey = `${endpoint}:${JSON.stringify(params)}`;
   const cached = ytCache.get(cacheKey);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
 
-  // Check persistent storage for quick warm-up
+  // Check persistent storage for quick warm-up (offline fallback)
   const storageKey = `yt_cache_${endpoint}_${JSON.stringify(params)}`;
 
+  let fetchUrl;
+
+  if (DIRECT_API_KEY) {
+    // ✅ Capacitor / Android APK mode: call YouTube API directly
+    const url = new URL(`${YT_BASE}/${endpoint}`);
+    url.searchParams.set('key', DIRECT_API_KEY);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    fetchUrl = url.toString();
+  } else {
+    // 🌐 Web/Vercel mode: use server-side proxy to hide the key
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+    const url = new URL(PROXY, baseUrl);
+    url.searchParams.set('endpoint', endpoint);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    fetchUrl = url.toString();
+  }
+
   try {
-    const res = await fetch(url.toString());
+    const res = await fetchWithRetry(fetchUrl, {}, { retries: 2, backoff: 800, timeout: 8000 });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       if (res.status >= 500) {
-        throw new Error("Unable to connect to the server. Please try again later.");
+        throw new Error('Unable to connect to the server. Please try again later.');
       }
       if (res.status === 403 || res.status === 429) {
-        throw new Error("YouTube API limit reached. Please try again later.");
+        throw new Error('YouTube API limit reached. Please try again later.');
       }
       throw new Error(err?.error?.message || `Failed to load data (Error ${res.status}).`);
     }
@@ -45,11 +61,11 @@ async function fetchYT(endpoint, params = {}) {
     try {
       localStorage.setItem(storageKey, JSON.stringify({ data, ts: Date.now() }));
     } catch {
-      // ignore quota
+      // ignore storage quota errors
     }
     return data;
   } catch (err) {
-    // If network fails (e.g. airplane mode or offline), check persistent fallback cache
+    // Network error: try persistent cache fallback
     try {
       const persisted = localStorage.getItem(storageKey);
       if (persisted) {
@@ -64,7 +80,7 @@ async function fetchYT(endpoint, params = {}) {
     }
 
     if (err.name === 'TypeError' && err.message.includes('fetch')) {
-      throw new Error("Please check your internet connection and try again.");
+      throw new Error('Please check your internet connection and try again.');
     }
     throw err;
   }

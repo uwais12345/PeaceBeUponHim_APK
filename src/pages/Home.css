@@ -219,6 +219,15 @@
   flex-shrink: 0;
 }
 
+.hm-feature-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
 [data-theme="light"] .hm-feature-icon-wrap {
   background: #f3f9f5;
 }
@@ -650,6 +659,7 @@
   }
   .hm-feature-card { min-height: 84px; padding: 16px; }
   .hm-feature-icon-wrap { width: 44px; height: 44px; }
+  .hm-feature-icon-img { width: 26px; height: 26px; }
   .hm-feature-name { font-size: 0.88rem; }
   .hm-feature-tamil { font-size: 0.72rem; }
 

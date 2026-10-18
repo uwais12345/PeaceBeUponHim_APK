@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Bookmark, Share2, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Bookmark, Loader2 } from 'lucide-react';
 import { fetchAfterSalahData } from '../services/after-salah';
 import { useBookmarks } from '../context/AppContext';
 import { useState, useEffect } from 'react';
+import { useAppBack } from '../hooks/useAppNavigation';
 import '../styles/global.css';
 import FriendlyError from '../components/ui/FriendlyError';
 import { parseError } from '../utils/errorHandling';
 
 export default function AfterSalah() {
+  const handleBack = useAppBack('/dhikr');
   const { isBookmarked, toggle: toggleBookmark } = useBookmarks();
   const [completed, setCompleted] = useState({});
   const [dhikrList, setDhikrList] = useState([]);
@@ -37,9 +39,9 @@ export default function AfterSalah() {
   return (
     <main className="page-wrapper fade-in" id="main-content">
       <div className="container">
-        <Link to="/dhikr" className="back-link">
+        <button type="button" onClick={handleBack} className="back-link">
           <ArrowLeft size={16} /> திக்ர் (Dhikr)
-        </Link>
+        </button>
         
         <div className="page-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}></div>

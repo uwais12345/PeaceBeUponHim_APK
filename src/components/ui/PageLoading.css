@@ -1,0 +1,81 @@
+.page-loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: calc(100vh - var(--navbar-total, 64px));
+  min-height: calc(100dvh - var(--navbar-total, 64px));
+  padding: 2rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+/* On mobile, ensure loading group is cleanly centered accounting for floating bottom navigation */
+@media (max-width: 767px) {
+  .page-loading-wrapper {
+    min-height: calc(100vh - var(--navbar-total, 64px) - var(--bottom-nav-height, 64px));
+    min-height: calc(100dvh - var(--navbar-total, 64px) - var(--bottom-nav-height, 64px));
+    padding-bottom: calc(var(--bottom-nav-height, 64px) + env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+}
+
+.page-loading-logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-loading-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-gold, #c8973a);
+  box-shadow: 0 3px 14px rgba(18, 77, 43, 0.16), 0 0 10px rgba(200, 151, 58, 0.22);
+  animation: pbuh-logo-pulse 2.2s ease-in-out infinite;
+  will-change: transform, opacity, box-shadow;
+  display: block;
+}
+
+[data-theme="dark"] .page-loading-logo {
+  border-color: #d4a74a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(212, 167, 74, 0.28);
+}
+
+.page-loading-text {
+  margin-top: 1rem;
+  color: var(--color-text-secondary, #4a4a4a);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+[data-theme="dark"] .page-loading-text {
+  color: #94a3b8;
+}
+
+/* Subtle, restrained loading animation */
+@keyframes pbuh-logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.92;
+    box-shadow: 0 4px 16px rgba(18, 77, 43, 0.14), 0 0 10px rgba(200, 151, 58, 0.18);
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+    box-shadow: 0 8px 24px rgba(18, 77, 43, 0.24), 0 0 22px rgba(200, 151, 58, 0.38);
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .page-loading-logo {
+    animation: none !important;
+    transform: none !important;
+  }
+}

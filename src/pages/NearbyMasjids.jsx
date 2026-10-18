@@ -9,6 +9,8 @@ import {
   getGoogleMapsSearchUrl,
 } from '../services/masjidService';
 import { getUserLocation } from '../services/locationService';
+import { parseError } from '../utils/errorHandling';
+import BackButton from '../components/ui/BackButton';
 import './NearbyMasjids.css';
 
 const MAX_LOCATION_ACCURACY_METERS = 2000;
@@ -40,7 +42,8 @@ export default function NearbyMasjids() {
       if (sequence === searchSequence.current) setMasjids(results);
     } catch (error) {
       if (sequence === searchSequence.current) {
-        setSearchError(error.message || 'Unable to search for nearby Masjids. Please try again.');
+        const parsed = parseError(error, 'nearby masjids');
+        setSearchError(parsed.message);
       }
     } finally {
       if (sequence === searchSequence.current) setLoading(false);
@@ -108,7 +111,8 @@ export default function NearbyMasjids() {
       }
     } catch (error) {
       if (sequence === searchSequence.current) {
-        setSearchError(error.message || 'Unable to find that location. Please try another town or area.');
+        const parsed = parseError(error, 'location search');
+        setSearchError(parsed.message || 'Unable to find that location. Please try another town or area.');
         setLoading(false);
       }
     }
@@ -117,6 +121,9 @@ export default function NearbyMasjids() {
   return (
     <main className="page-wrapper fade-in" id="main-content">
       <div className="container nearby-masjids-container">
+        <div className="app-top-nav">
+          <BackButton fallback="/" label="Back" />
+        </div>
         <section className="nearby-hero" aria-labelledby="nearby-page-title">
           <img src={masjidBanner} alt="" className="nearby-hero-image" />
           <div className="nearby-hero-shade" />

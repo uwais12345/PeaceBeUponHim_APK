@@ -1,14 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BookOpen, MessageSquare, Hand, Hexagon, BookMarked, Library,
   Camera, Play, Users, Eye, Video,
-  ChevronRight, RefreshCw
+  ChevronRight
 } from 'lucide-react';
 import {
   getChannelInfo, getLatestVideos, formatCount, formatRelativeDate, formatDuration, isConfigured
 } from '../services/youtube';
 import PrayerTimes from '../components/prayer/PrayerTimes';
+import { useLang } from '../context/AppContext';
+import { useAutoRefresh } from '../context/NetworkContext';
+import hadithBookIcon from '../assets/hadith-book.svg';
+import quranBookIcon from '../assets/quran-book.svg';
+import duaBookIcon from '../assets/dua-book.svg';
+import dhikrTasbihIcon from '../assets/dhikr-tasbih.svg';
+import afterSalahBookIcon from '../assets/after-salah-book.svg';
+import libraryBooksIcon from '../assets/library-books.svg';
 import './Home.css';
 
 import FriendlyError from '../components/ui/FriendlyError';
@@ -27,7 +34,7 @@ function VideoSkeleton() {
   );
 }
 
-function NotConfigured() {
+function NotConfigured({ t }) {
   return (
     <div className="empty-state">
       <p className="empty-state-title">YouTube Integration Not Configured</p>
@@ -71,33 +78,40 @@ function VideoCard({ video }) {
 
 /* ── Feature items config ── */
 const FEATURES = [
-  { to: '/quran',       label: 'Quran',       tamil: 'குர்ஆன்',          arabic: 'قرآن',      icon: BookOpen,    accentColor: '#e9a825' },
-  { to: '/hadith',      label: 'Hadith',      tamil: 'ஹதீஸ்',            arabic: 'حديث',      icon: MessageSquare, accentColor: '#df94be' },
-  { to: '/dua',         label: 'Dua',         tamil: 'துஆ',              arabic: 'دعاء',      icon: Hand,        accentColor: '#6de0b0' },
-  { to: '/dhikr',       label: 'Dhikr',       tamil: 'திக்ர்',           arabic: 'ذكر',       icon: Hexagon,     accentColor: '#f3ca56' },
-  { to: '/after-salah', label: 'After Salah', tamil: 'தொழுகைக்குப் பின்', arabic: 'بعد الصلاة', icon: BookMarked,  accentColor: '#9fd7bb' },
-  { to: '/library',     label: 'Library',     tamil: 'நூலகம்',           arabic: 'مكتبة',     icon: Library,     accentColor: '#86baa5' },
+  { to: '/quran',       key: 'quran',       arabic: 'قرآن',      image: quranBookIcon,       accentColor: '#e9a825' },
+  { to: '/hadith',      key: 'hadith',      arabic: 'حديث',      image: hadithBookIcon,      accentColor: '#df94be' },
+  { to: '/dua',         key: 'dua',         arabic: 'دعاء',      image: duaBookIcon,         accentColor: '#6de0b0' },
+  { to: '/dhikr',       key: 'dhikr',       arabic: 'ذكر',       image: dhikrTasbihIcon,     accentColor: '#f3ca56' },
+  { to: '/after-salah', key: 'afterSalah',  arabic: 'بعد الصلاة', image: afterSalahBookIcon,  accentColor: '#9fd7bb' },
+  { to: '/library',     key: 'library',     arabic: 'مكتبة',     image: libraryBooksIcon,    accentColor: '#86baa5' },
 ];
+
+// In-memory module cache for instant return navigation
+let _homeCache = null;
 
 /* ══════════════════════════════════════════════════
    MAIN HOME PAGE
 ══════════════════════════════════════════════════ */
 export default function Home() {
-  const [channel, setChannel] = useState(null);
-  const [videos, setVideos]   = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [channel, setChannel] = useState(() => _homeCache?.channel || null);
+  const [videos, setVideos]   = useState(() => _homeCache?.videos || []);
+  const [loading, setLoading] = useState(() => !_homeCache && isConfigured);
   const [error, setError]     = useState(null);
+  const { t, lang } = useLang();
 
   const loadHomeData = useCallback(async (isRetry = false) => {
-    setLoading(true);
+    if (!_homeCache) setLoading(true);
     if (!isRetry) setError('');
     try {
       const [ch, vids] = await Promise.all([getChannelInfo(), getLatestVideos({ maxResults: 4 })]);
+      _homeCache = { channel: ch, videos: vids.videos || [] };
       setChannel(ch);
       setVideos(vids.videos || []);
       setError('');
     } catch (e) {
-      setError(parseError(e, 'YouTube content'));
+      if (!_homeCache) {
+        setError(parseError(e, 'YouTube content'));
+      }
     } finally {
       setLoading(false);
     }
@@ -107,6 +121,12 @@ export default function Home() {
     if (!isConfigured) { setLoading(false); return; }
     loadHomeData();
   }, [loadHomeData]);
+
+  // Automatically retry loading home YouTube content when network connectivity returns
+  useAutoRefresh('home-content', () => loadHomeData(true), {
+    enabled: isConfigured && (!!error || !videos.length || !channel),
+    deps: [isConfigured, !!error, videos.length, !!channel],
+  });
 
   return (
     <main className="hm-page fade-in" id="main-content">
@@ -121,9 +141,7 @@ export default function Home() {
             قُرْآن • حَدِيث • سُنَّة
           </div>
           <h1 className="hm-hero-title">Peace Be Upon Him</h1>
-          <p className="hm-hero-desc">
-            Authentic Islamic knowledge in Tamil — Quran, Hadith, Dua and Sunnah explained clearly for Tamil-speaking Muslims.
-          </p>
+          <p className="hm-hero-desc">{t('heroDesc')}</p>
           <div className="hm-hero-actions">
             <a
               href={channel?.customUrl
@@ -135,7 +153,7 @@ export default function Home() {
               id="hero-watch-btn"
             >
               <Play size={15} aria-hidden="true" fill="currentColor" />
-              Watch on YouTube
+              {t('watchOnYouTube')}
             </a>
             <a
               href="https://www.instagram.com/peace_be_upon_him__?stkn=MW5uY2RrNWZqbXc1Ng=="
@@ -145,7 +163,7 @@ export default function Home() {
               id="hero-instagram-btn"
             >
               <Camera size={15} aria-hidden="true" />
-              Instagram
+              {t('instagram')}
             </a>
           </div>
         </div>
@@ -159,23 +177,32 @@ export default function Home() {
       {/* ── FEATURES GRID ── */}
       <section className="hm-section" aria-label="Quick access to Islamic resources">
         <div className="hm-section-header">
-          <h2 className="hm-section-title">Features</h2>
-          <span className="hm-section-sub tamil-text">அம்சங்கள்</span>
+          <h2 className="hm-section-title">{t('features')}</h2>
         </div>
         <div className="hm-features-grid">
-          {FEATURES.map(({ to, label, tamil, arabic, icon: Icon, accentColor }) => (
-            <Link key={to} to={to} className="hm-feature-card" id={`feature-${label.toLowerCase()}`}>
+          {FEATURES.map(({ to, key, arabic, icon: Icon, image, accentColor }) => (
+            <Link key={to} to={to} className="hm-feature-card" id={`feature-${key}`}>
               <div className="hm-feature-icon-wrap" style={{ '--feature-accent': accentColor }}>
-                <Icon size={20} aria-hidden="true" />
+                {image ? (
+                  <img
+                    src={image}
+                    alt={t(key)}
+                    className="hm-feature-icon-img"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Icon size={20} aria-hidden="true" />
+                )}
               </div>
               <div className="hm-feature-text">
                 <div className="hm-feature-name">
-                  {label}
-                  <span className="hm-feature-arabic arabic-text notranslate" dir="rtl" translate="no" style={{ color: accentColor }}>
-                    {arabic}
-                  </span>
+                  {t(key)}
+                  {lang !== 'ar' && (
+                    <span className="hm-feature-arabic arabic-text notranslate" dir="rtl" translate="no" style={{ color: accentColor }}>
+                      {arabic}
+                    </span>
+                  )}
                 </div>
-                <div className="hm-feature-tamil tamil-text">{tamil}</div>
               </div>
             </Link>
           ))}
@@ -183,11 +210,11 @@ export default function Home() {
       </section>
 
       {/* ── CHANNEL STATS ── */}
-      <section className="hm-section" aria-label="Channel statistics">
+      <section className="hm-section" aria-label={t('channelStats')}>
         <div className="hm-section-header">
           <div>
-            <h2 className="hm-section-title">Channel Statistics</h2>
-            <p className="hm-section-sub">Live data from YouTube</p>
+            <h2 className="hm-section-title">{t('channelStats')}</h2>
+            <p className="hm-section-sub">{t('liveFromYoutube')}</p>
           </div>
           <a
             href={channel?.customUrl
@@ -197,7 +224,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="hm-link-sm"
           >
-            Visit Channel <ChevronRight size={12} />
+            {t('visitChannel')} <ChevronRight size={12} />
           </a>
         </div>
 
@@ -228,21 +255,21 @@ export default function Home() {
                   <div className="hm-stat-card">
                     <Users size={18} className="hm-stat-icon" aria-hidden="true" />
                     <p className="hm-stat-number">{formatCount(channel.subscriberCount)}</p>
-                    <p className="hm-stat-label">Subscribers</p>
+                    <p className="hm-stat-label">{t('subscribers')}</p>
                   </div>
                 )}
                 {channel.viewCount && (
                   <div className="hm-stat-card">
                     <Eye size={18} className="hm-stat-icon" aria-hidden="true" />
                     <p className="hm-stat-number">{formatCount(channel.viewCount)}</p>
-                    <p className="hm-stat-label">Total Views</p>
+                    <p className="hm-stat-label">{t('totalViews')}</p>
                   </div>
                 )}
                 {channel.videoCount && (
                   <div className="hm-stat-card">
                     <Video size={18} className="hm-stat-icon" aria-hidden="true" />
                     <p className="hm-stat-number">{formatCount(channel.videoCount)}</p>
-                    <p className="hm-stat-label">Videos</p>
+                    <p className="hm-stat-label">{t('videos')}</p>
                   </div>
                 )}
               </div>
@@ -252,11 +279,10 @@ export default function Home() {
       </section>
 
       {/* ── LATEST VIDEOS ── */}
-      <section className="hm-section" aria-label="Latest videos">
+      <section className="hm-section" aria-label={t('latestVideos')}>
         <div className="hm-section-header">
           <div>
-            <h2 className="hm-section-title">Latest Videos</h2>
-            <p className="hm-section-sub tamil-text">புதிய வீடியோக்கள்</p>
+            <h2 className="hm-section-title">{t('latestVideos')}</h2>
           </div>
         </div>
 
@@ -280,7 +306,7 @@ export default function Home() {
           )
           : videos.length > 0
           ? <div className="hm-videos-list">{videos.map(v => <VideoCard key={v.id} video={v} />)}</div>
-          : <div className="empty-state"><p className="empty-state-title">No videos available</p></div>
+          : <div className="empty-state"><p className="empty-state-title">{t('noVideos')}</p></div>
         }
       </section>
 

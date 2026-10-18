@@ -3,18 +3,53 @@
 // Uses https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1
 // ============================================
 
+import { fetchWithRetry } from './networkManager.js';
+
 const BASE = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions';
 const cache = new Map();
 
-// Hadith is online-only — fetches from cdn.jsdelivr.net at runtime.
-// In-memory cache deduplicates repeated calls within the same session.
+// Hadith fetches from cdn.jsdelivr.net with session persistence & retry
+// In-memory cache & sessionStorage enable offline access for previously opened books.
 async function fetchCached(url) {
   if (cache.has(url)) return cache.get(url);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Hadith API error: ${res.status}`);
-  const data = await res.json();
-  cache.set(url, data);
-  return data;
+
+  const storageKey = `hadith_cache_${url}`;
+  try {
+    const saved = sessionStorage.getItem(storageKey);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      cache.set(url, parsed);
+      return parsed;
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    const res = await fetchWithRetry(url, {}, { retries: 2, backoff: 800, timeout: 8000 });
+    if (!res.ok) throw new Error(`Hadith API error: ${res.status}`);
+    const data = await res.json();
+    cache.set(url, data);
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify(data));
+    } catch {
+      // ignore quota
+    }
+    return data;
+  } catch (err) {
+    // If request failed, double check fallback storage
+    try {
+      const saved = sessionStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        cache.set(url, parsed);
+        return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    throw err;
+  }
 }
 
 // Available collections
@@ -95,6 +130,32 @@ export function getCollection(id) {
   return COLLECTIONS.find(c => c.id === id) || null;
 }
 
+// Curated verified hadith texts for unpopulated or missing API entries (e.g. Sahih Muslim intro hadiths)
+export const HADITH_OVERRIDES = {
+  muslim: {
+    '1': {
+      arab: 'وَهُوَ الأَثَرُ الْمَشْهُورُ عَنْ رَسُولِ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ: "مَنْ حَدَّثَ عَنِّي بِحَدِيثٍ يُرَى أَنَّهُ كَذِبٌ فَهُوَ أَحَدُ الْكَاذِبِينَ". حَدَّثَنَا أَبُو بَكْرِ بْنُ أَبِي شَيْبَةَ، حَدَّثَنَا وَكِيعٌ، عَنْ شُعْبَةَ، عَنِ الْحَكَمِ، عَنْ عَبْدِ الرَّحْمَنِ بْنِ أَبِي لَيْلَى، عَنْ سَمُرَةَ بْنِ جُنْدَبٍ، وَعَنِ الْمُغِيرَةِ بْنِ شُعْبَةَ قَالَا: قَالَ رَسُولُ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ ذَلِكَ.',
+      translation: 'அல்லாஹ்வின் தூதர் (ஸல்) அவர்கள் கூறியதாக பிரசித்தி பெற்ற செய்தி: "பொய் என்று கருதப்படும் ஒரு செய்தியை என் பெயரால் எவரேனும் கூறினால், அவரும் பொய்யர்களில் ஒருவராவார்." (அறிவிப்பாளர்கள்: சமுரா பின் ஜுன்துப் (ரலி), அல்-முகீரா பின் ஷுஃபா (ரலி))',
+      engTranslation: 'And it is the well-known narration from the Messenger of Allah (ﷺ): "Whoever narrates a hadith from me while it is thought that it is a lie, then he is one of the liars." (Narrated by Samurah bin Jundab and al-Mughirah bin Shu\'bah (ra))',
+    },
+    '2': {
+      arab: 'حَدَّثَنَا أَبُو بَكْرِ بْنُ أَبِي شَيْبَةَ، حَدَّثَنَا غُنْدَرٌ، عَنْ شُعْبَةَ، ح وَحَدَّثَنَا مُحَمَّدُ بْنُ الْمُثَنَّى، وَابْنُ بَشَّارٍ، قَالَا: حَدَّثَنَا مُحَمَّدُ بْنُ جَعْفَرٍ، حَدَّثَنَا شُعْبَةُ، عَنْ مَنْصُورٍ، عَنْ رِبْعِيِّ بْنِ حِرَاشٍ، أَنَّهُ سَمِعَ عَلِيًّا رَضِيَ اللهُ عَنْهُ يَخْطُبُ يَقُولُ: قَالَ رَسُولُ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ: "لَا تَكْذِبُوا عَلَيَّ، فَإِنَّهُ مَنْ يَكْذِبْ عَلَيَّ يَلِجِ النَّارَ".',
+      translation: 'அலீ (ரலி) அவர்கள் உரை நிகழ்த்திய போது கூறியதாவது: அல்லாஹ்வின் தூதர் (ஸல்) அவர்கள் கூறினார்கள்: "என் மீது பொய் உரைக்காதீர்கள்; ஏனெனில் எவர் என் மீது பொய்யுரைக்கிறாரோ அவர் நரகில் நுழைவார்."',
+      engTranslation: 'Ali (may Allah be pleased with him) delivered a sermon saying: The Messenger of Allah (ﷺ) said: "Do not tell lies against me, for whoever tells lies against me will certainly enter the Fire."',
+    },
+    '5': {
+      arab: 'حَدَّثَنَا مُحَمَّدُ بْنُ عَبْدِ اللهِ بْنِ نُمَيْرٍ، حَدَّثَنَا أَبِي، حَدَّثَنَا سَعِيدُ بْنُ عُبَيْدٍ، حَدَّثَنَا عَلِيُّ بْنُ رَبِيعَةَ، قَالَ: سَمِعْتُ الْمُغِيرَةَ بْنَ شُعْبَةَ، يَقُولُ: سَمِعْتُ رَسُولَ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ يَقُولُ: "إِنَّ كَذِبًا عَلَيَّ لَيْسَ كَكَذِبٍ عَلَى أَحَدٍ، فَمَنْ كَذَبَ عَلَيَّ مُتَعَمِّدًا، فَلْيَتَبَوَّأْ مَقْعَدَهُ مِنَ النَّارِ".',
+      translation: 'முகீரா பின் ஷுஃபா (ரலி) அவர்கள் கூறியதாவது: அல்லாஹ்வின் தூதர் (ஸல்) அவர்கள் கூறக் கேட்டேன்: "என் மீது பொய் சொல்வது மற்றவர் மீது பொய் சொல்வதைப் போன்றதல்ல; என் மீது எவர் வேண்டுமென்றே பொய்யுரைக்கிறாரோ அவர் தனது தங்குமிடத்தை நரகத்தில் அமைத்துக் கொள்ளட்டும்."',
+      engTranslation: 'Al-Mughirah bin Shu\'bah reported: I heard the Messenger of Allah (ﷺ) say: "Telling lies about me is not like telling lies about anyone else. Whoever intentionally lies about me, let him take his place in the Fire."',
+    },
+    '7': {
+      arab: 'حَدَّثَنَا عُبَيْدُ اللهِ بْنُ مُعَاذٍ الْعَنْبَرِيُّ، حَدَّثَنَا أَبِي، حَدَّثَنَا شُعْبَةُ، عَنْ مُحَمَّدِ بْنِ قَيْسٍ، عَنْ عَلِيِّ بْنِ رَبِيعَةَ الأَسَدِيِّ، عَنِ الْمُغِيرَةِ بْنِ شُعْبَةَ، عَنِ النَّبِيِّ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ بِمِثْلِهِ.',
+      translation: 'முகீரா பின் ஷுஃபா (ரலி) அவர்கள் நபி (ஸல்) அவர்களிடமிருந்து இதே போன்ற மற்றொரு அறிவிப்பாளர் தொடர் வழியாகவும் அறிவிக்கிறார்கள்.',
+      engTranslation: 'Another narration from al-Mughirah bin Shu\'bah from the Prophet (ﷺ) with the same meaning.',
+    },
+  },
+};
+
 // Get hadiths from a collection
 export async function getHadithsByBook(collectionId, bookId) {
   try {
@@ -113,23 +174,54 @@ export async function getHadithsByBook(collectionId, bookId) {
     const transData = tamData && tamData.hadiths ? tamData : engData;
     if (!transData || !transData.hadiths) return { hadiths: [], error: 'Failed to load' };
 
-    const formattedHadiths = transData.hadiths.map((h, i) => {
-      const araText = araData?.hadiths?.[i]?.text || '';
-      const engText = engData?.hadiths?.[i]?.text || '';
-      return {
-        number: h.hadithnumber,
-        arab: araText,
-        translation: h.text,
-        engTranslation: engText,
-        id: `${h.reference?.book}-${h.reference?.hadith}`
-      };
-    });
+    const araMap = new Map();
+    if (araData?.hadiths) {
+      araData.hadiths.forEach(h => {
+        if (h && h.hadithnumber != null) araMap.set(String(h.hadithnumber), h.text);
+      });
+    }
+
+    const engMap = new Map();
+    if (engData?.hadiths) {
+      engData.hadiths.forEach(h => {
+        if (h && h.hadithnumber != null) engMap.set(String(h.hadithnumber), h.text);
+      });
+    }
+
+    const formattedHadiths = transData.hadiths
+      .map((h, i) => {
+        const numStr = String(h.hadithnumber);
+        let araText = araMap.get(numStr) || araData?.hadiths?.[i]?.text || '';
+        let engText = engMap.get(numStr) || engData?.hadiths?.[i]?.text || '';
+        let tamText = h.text || '';
+
+        const override = HADITH_OVERRIDES?.[collectionId]?.[numStr];
+        if (override) {
+          if (override.arab) araText = override.arab;
+          if (override.translation) tamText = override.translation;
+          if (override.engTranslation) engText = override.engTranslation;
+        }
+
+        return {
+          number: h.hadithnumber,
+          arab: araText,
+          translation: tamText,
+          engTranslation: engText,
+          id: `${h.reference?.book}-${h.reference?.hadith}`
+        };
+      })
+      .filter(h => {
+        // Filter out empty phantom entries across all imams
+        return (h.arab && h.arab.trim().length > 0) ||
+               (h.translation && h.translation.trim().length > 0) ||
+               (h.engTranslation && h.engTranslation.trim().length > 0);
+      });
 
     return {
       hadiths: formattedHadiths,
       name: col.name,
       bookName: transData.metadata?.section?.[bookId] || `Book ${bookId}`,
-      total: transData.hadiths.length,
+      total: formattedHadiths.length,
     };
   } catch (err) {
     console.error(err);
@@ -153,27 +245,58 @@ export async function getHadiths(collectionId, { page = 1, limit = 20 } = {}) {
     const transData = tamData && tamData.hadiths ? tamData : engData;
     if (!transData || !transData.hadiths) return { hadiths: [], error: 'Failed to load' };
 
+    const araMap = new Map();
+    if (araData?.hadiths) {
+      araData.hadiths.forEach(h => {
+        if (h && h.hadithnumber != null) araMap.set(String(h.hadithnumber), h.text);
+      });
+    }
+
+    const engMap = new Map();
+    if (engData?.hadiths) {
+      engData.hadiths.forEach(h => {
+        if (h && h.hadithnumber != null) engMap.set(String(h.hadithnumber), h.text);
+      });
+    }
+
+    // Map, enrich overrides, and filter out phantom empty hadiths across all imams
+    const allFormatted = transData.hadiths
+      .map((h, i) => {
+        const numStr = String(h.hadithnumber);
+        let araText = araMap.get(numStr) || araData?.hadiths?.[i]?.text || '';
+        let engText = engMap.get(numStr) || engData?.hadiths?.[i]?.text || '';
+        let tamText = h.text || '';
+
+        const override = HADITH_OVERRIDES?.[collectionId]?.[numStr];
+        if (override) {
+          if (override.arab) araText = override.arab;
+          if (override.translation) tamText = override.translation;
+          if (override.engTranslation) engText = override.engTranslation;
+        }
+
+        return {
+          number: h.hadithnumber,
+          arab: araText,
+          translation: tamText,
+          engTranslation: engText,
+          id: `${h.reference?.book}-${h.reference?.hadith}`
+        };
+      })
+      .filter(h => {
+        // Ensure no empty card is ever produced for any collection
+        return (h.arab && h.arab.trim().length > 0) ||
+               (h.translation && h.translation.trim().length > 0) ||
+               (h.engTranslation && h.engTranslation.trim().length > 0);
+      });
+
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    
-    // Format to match old UI expectations
-    const formattedHadiths = transData.hadiths.slice(startIndex, endIndex).map((h, i) => {
-      const realIndex = startIndex + i;
-      const araText = araData?.hadiths?.[realIndex]?.text || '';
-      const engText = engData?.hadiths?.[realIndex]?.text || '';
-      return {
-        number: h.hadithnumber,
-        arab: araText,
-        translation: h.text,
-        engTranslation: engText,
-        id: `${h.reference?.book}-${h.reference?.hadith}`
-      };
-    });
+    const pagedHadiths = allFormatted.slice(startIndex, endIndex);
 
     return {
-      hadiths: formattedHadiths,
+      hadiths: pagedHadiths,
       name: transData.metadata?.name || col.name,
-      total: transData.hadiths.length,
+      total: allFormatted.length,
     };
   } catch (e) {
     return { hadiths: [], error: e.message };
@@ -186,6 +309,9 @@ export async function getHadith(collectionId, number) {
     const col = getCollection(collectionId);
     if (!col) return null;
 
+    const numStr = String(number);
+    const override = HADITH_OVERRIDES?.[collectionId]?.[numStr];
+
     const collectionKey = col.id === 'abu-dawud' ? 'abudawud' : col.id === 'tirmidzi' ? 'tirmidhi' : col.id === 'ibnu-majah' ? 'ibnmajah' : col.id;
 
     const [araData, tamData, engData] = await Promise.all([
@@ -195,19 +321,39 @@ export async function getHadith(collectionId, number) {
     ]);
 
     const transData = tamData && tamData.hadiths ? tamData : engData;
-    if (!transData || !transData.hadiths) return null;
+    if (!transData || !transData.hadiths) {
+      if (override) {
+        return {
+          number: Number(number) || number,
+          arab: override.arab,
+          translation: override.translation,
+          engTranslation: override.engTranslation,
+          id: `0-${number}`
+        };
+      }
+      return null;
+    }
 
-    const hIndex = transData.hadiths.findIndex(x => String(x.hadithnumber) === String(number));
-    if (hIndex === -1) return null;
+    const hIndex = transData.hadiths.findIndex(x => String(x.hadithnumber) === numStr);
+    if (hIndex === -1 && !override) return null;
     
-    const h = transData.hadiths[hIndex];
-    const araText = araData?.hadiths?.[hIndex]?.text || '';
+    const h = hIndex !== -1 ? transData.hadiths[hIndex] : {};
+    let araText = (hIndex !== -1 ? araData?.hadiths?.[hIndex]?.text : '') || '';
+    let tamText = h.text || '';
+    let engText = (hIndex !== -1 ? engData?.hadiths?.[hIndex]?.text : '') || '';
+
+    if (override) {
+      if (override.arab) araText = override.arab;
+      if (override.translation) tamText = override.translation;
+      if (override.engTranslation) engText = override.engTranslation;
+    }
 
     return {
-      number: h.hadithnumber,
+      number: h.hadithnumber || number,
       arab: araText,
-      translation: h.text,
-      id: `${h.reference?.book}-${h.reference?.hadith}`
+      translation: tamText,
+      engTranslation: engText,
+      id: `${h.reference?.book || 0}-${h.reference?.hadith || number}`
     };
   } catch {
     return null;

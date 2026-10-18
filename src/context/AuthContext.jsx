@@ -23,25 +23,39 @@ const API = import.meta.env.VITE_API_URL || '';   // empty = same-origin (Vite p
 const DEVICE_ID_KEY   = 'pbuh_device_id';
 const DEVICE_TOKEN_KEY = 'pbuh_device_token';
 
+/** UUID v4 fallback for non-secure contexts (HTTP / Android WebView) where crypto.randomUUID is unavailable. */
+function generateUUID() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Manual RFC 4122 v4 UUID using Math.random (acceptable for device-id purposes)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
 /** Generate or retrieve a stable per-device UUID. */
 function getOrCreateDeviceId() {
   let id = localStorage.getItem(DEVICE_ID_KEY);
   if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
-    id = crypto.randomUUID();
+    id = generateUUID();
     localStorage.setItem(DEVICE_ID_KEY, id);
   }
   return id;
 }
 
-/** Call the backend device-registration endpoint. Idempotent — same UUID → same token. */
 async function registerDevice(deviceId) {
   const response = await fetch(`${API}/api/device/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ device_id: deviceId }),
   });
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    throw new Error(`Device registration server responded with ${response.status}: ${errText || response.statusText}`);
+  }
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || 'Device registration failed.');
   return body.token;   // server-signed session token
 }
 

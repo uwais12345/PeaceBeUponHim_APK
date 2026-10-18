@@ -3,10 +3,9 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Home, BookOpen, MessageSquare, Heart, Hash, Compass,
-  Library, MonitorPlay, Info, Search, Sun, Moon, Menu, X,
-  Settings, MapPin, Navigation2
+  Library, Info, Menu, X, Settings, MapPin, Headphones, Sparkles
 } from 'lucide-react';
-import { useTheme, useSearch, useLang } from '../../context/AppContext';
+import { useTheme, useLang } from '../../context/AppContext';
 import '../../styles/navbar.css';
 
 /* ── Primary links shown in the desktop top navbar (6 max) ── */
@@ -21,16 +20,17 @@ const DESKTOP_NAV = [
 
 /* ── Quick links in the mobile bottom bar ── */
 const BOTTOM_NAV = [
-  { to: '/',       key: 'home',   icon: Home,        exact: true },
-  { to: '/quran',  key: 'quran',  icon: BookOpen },
-  { to: '/qibla',  key: 'qibla',  icon: Navigation2 },
-  { to: '/explore',key: 'explore',icon: Compass },
+  { to: '/',         key: 'home',     icon: Home,       exact: true },
+  { to: '/quran',    key: 'quran',    icon: BookOpen },
+  { to: '/qiraath',  key: 'qiraath',  icon: Headphones },
+  { to: '/dua',      key: 'dua',      icon: Heart },
+  { to: '/explore',  key: 'explore',  icon: Compass },
 ];
 
 /* ── All destinations available in the slide-up drawer ── */
 const MENU_LINKS = [
+  { to: '/inspiration',   key: 'inspiration',    icon: Sparkles },
   { to: '/hadith',        key: 'hadith',         icon: MessageSquare },
-  { to: '/dua',           key: 'dua',            icon: Heart },
   { to: '/dhikr',         key: 'dhikr',          icon: Hash },
   { to: '/nearby-masjids',key: 'nearbyMasjids',  icon: MapPin },
   { to: '/library',       key: 'library',        icon: Library },
@@ -38,12 +38,14 @@ const MENU_LINKS = [
   { to: '/settings',      key: 'settings',       icon: Settings },
 ];
 
+/* ─────────────────────────────────────────────
+   Main Navbar
+───────────────────────────────────────────── */
 export default function Navbar({ onAuthClick }) {
   const { theme, toggle } = useTheme();
-  const { open: openSearch } = useSearch();
   const { t } = useLang();
-  const [scrolled, setScrolled]   = useState(false);
-  const [menuOpen, setMenuOpen]   = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function Navbar({ onAuthClick }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  /* Close drawer on route change */
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
@@ -69,9 +72,22 @@ export default function Navbar({ onAuthClick }) {
   useEffect(() => {
     if (!menuOpen) return undefined;
     const closeOnEscape = e => { if (e.key === 'Escape') setMenuOpen(false); };
+    const closeOnBack = e => {
+      e.preventDefault();
+      setMenuOpen(false);
+    };
     document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
+    window.addEventListener('pbuh:back', closeOnBack);
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('pbuh:back', closeOnBack);
+    };
   }, [menuOpen]);
+
+  // On full-screen Mushaf reader pages, do not render top navbar or bottom navigation
+  if (location.pathname.startsWith('/quran/mushaf/page')) {
+    return null;
+  }
 
   return (
     <>
@@ -84,7 +100,11 @@ export default function Navbar({ onAuthClick }) {
         <div className="container navbar-inner">
 
           {/* Left: Logo + brand */}
-          <Link to="/" className="navbar-logo" aria-label="Peace be upon him — Home">
+          <Link
+            to="/"
+            className="navbar-logo"
+            aria-label="Peace be upon him — Home"
+          >
             <img
               src="/channels4_profile.jpg"
               alt="Peace be upon him Logo"
@@ -105,6 +125,11 @@ export default function Navbar({ onAuthClick }) {
                 end={exact}
                 className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
                 role="menuitem"
+                onClick={(e) => {
+                  if (location.pathname === to) {
+                    e.preventDefault();
+                  }
+                }}
               >
                 <Icon size={14} aria-hidden="true" />
                 {t(key)}
@@ -112,24 +137,15 @@ export default function Navbar({ onAuthClick }) {
             ))}
           </div>
 
-          {/* Right: Search + hamburger (drawer trigger) */}
+          {/* Right: Hamburger menu button */}
           <div className="navbar-actions">
-            <button
-              className="navbar-search-btn"
-              onClick={openSearch}
-              aria-label="Search (Ctrl+K)"
-              title="Search (Ctrl+K)"
-            >
-              <Search size={15} aria-hidden="true" />
-            </button>
-
             <button
               className="navbar-hamburger"
               onClick={() => setMenuOpen(v => !v)}
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
 
@@ -146,6 +162,11 @@ export default function Navbar({ onAuthClick }) {
               end={exact}
               className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
               aria-label={t(key)}
+              onClick={(e) => {
+                if (location.pathname === to) {
+                  e.preventDefault();
+                }
+              }}
             >
               {({ isActive }) => (
                 <>
@@ -190,7 +211,7 @@ export default function Navbar({ onAuthClick }) {
         </div>
       </nav>
 
-      {/* ── Overlay ── */}
+      {/* ── Overlay (menu drawer) ── */}
       <div
         className={`mobile-menu-overlay${menuOpen ? ' open' : ''}`}
         onClick={() => setMenuOpen(false)}
@@ -223,31 +244,17 @@ export default function Navbar({ onAuthClick }) {
               key={to}
               to={to}
               className={({ isActive }) => `mobile-menu-link${isActive ? ' active' : ''}`}
+              onClick={(e) => {
+                if (location.pathname === to) {
+                  e.preventDefault();
+                }
+                setMenuOpen(false);
+              }}
             >
               <Icon size={22} aria-hidden="true" />
               <span>{t(key)}</span>
             </NavLink>
           ))}
-
-          {/* Search shortcut */}
-          <button
-            className="mobile-menu-link"
-            onClick={() => { openSearch(); setMenuOpen(false); }}
-          >
-            <Search size={22} aria-hidden="true" />
-            <span>{t('search')}</span>
-          </button>
-
-          {/* Theme toggle — accessible via drawer, not navbar */}
-          <button
-            className="mobile-menu-link"
-            onClick={() => { toggle(); setMenuOpen(false); }}
-          >
-            {theme === 'dark' ? <Sun size={22} /> : <Moon size={22} />}
-            <span>{theme === 'dark' ? t('light') : t('dark')}</span>
-          </button>
-
-
         </div>
       </div>
     </>

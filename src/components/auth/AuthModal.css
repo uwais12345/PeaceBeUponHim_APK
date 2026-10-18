@@ -215,22 +215,28 @@
 /* ── Buttons ── */
 .auth-btn-primary {
   width: 100%;
-  padding: 15px;
-  background: #161616;
-  color: #fff;
+  min-height: 48px;
+  padding: 0 20px;
+  background: var(--color-primary, #1a6b3a);
+  color: #ffffff;
   border: none;
   border-radius: 999px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px;
+  font-family: inherit;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  transition: transform 100ms ease, background 200ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 120ms ease, background-color 200ms ease, box-shadow 200ms ease;
   margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(26, 107, 58, 0.25);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .auth-btn-primary:hover {
-  background: #333;
+  background: var(--color-primary-dark, #124d2b);
 }
 
 .auth-btn-primary:active {
@@ -240,24 +246,31 @@
 .auth-btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .auth-btn-secondary {
   width: 100%;
-  padding: 14px;
+  min-height: 48px;
+  padding: 0 20px;
   background: transparent;
-  color: #333;
-  border: 1px solid rgba(0,0,0,0.2);
+  color: var(--color-text-secondary, #4a4a4a);
+  border: 1px solid var(--color-border, rgba(0,0,0,0.15));
   border-radius: 999px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 200ms ease, transform 100ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 200ms ease, transform 120ms ease, background-color 200ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .auth-btn-secondary:hover {
-  border-color: rgba(0,0,0,0.4);
+  border-color: var(--color-primary, #1a6b3a);
+  color: var(--color-primary, #1a6b3a);
 }
 
 .auth-btn-secondary:active {

@@ -207,3 +207,10 @@ export const NAMES_OF_ALLAH = names.map(([arabic, transliteration, meaning], ind
     'மிகுந்த பொறுமையுடையவன்',
   ][index],
 }));
+
+export function getNameAudioUrl(number) {
+  if (!number || number < 1 || number > NAMES_OF_ALLAH.length) return null;
+  const padded = String(number).padStart(3, '0');
+  return `https://www.islamicity.org/mediaassets/MP3/other/covers/99-names-of-Allah/${padded}.mp3`;
+}
+

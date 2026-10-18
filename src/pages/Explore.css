@@ -1,134 +1,110 @@
-.explore-page-hero {
-  margin-top: var(--space-5);
-  margin-bottom: var(--space-4);
-}
+/* ══════════════════════════════════════════════════
+   EXPLORE TOPICS — UNIFIED SETTINGS-STYLE DESIGN
+   Uses the exact same iOS-inspired Inset Cards,
+   typography, and row layout as Settings.jsx.
+   ══════════════════════════════════════════════════ */
 
-.explore-main-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-8);
-}
-
-.explore-main-card {
-  min-height: 82px;
-  padding: var(--space-3) var(--space-4);
-  text-align: start;
-  text-decoration: none;
+.explore-setting-row-left {
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
   align-items: center;
-  gap: var(--space-3);
-  border-radius: var(--radius-lg);
-}
-
-.explore-main-icon {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  place-items: center;
-  color: var(--color-primary);
-  background: var(--color-primary-subtle);
-  border-radius: 13px;
-}
-
-.explore-main-card:nth-child(3) .explore-main-icon,
-.explore-main-card:nth-child(5) .explore-main-icon {
-  color: var(--color-gold);
-  background: var(--color-gold-subtle);
-}
-
-.explore-main-card.primary .explore-main-icon {
-  color: #fff;
-  background: rgb(255 255 255 / 14%);
-}
-
-.explore-main-copy {
+  gap: 13px;
+  flex: 1;
   min-width: 0;
 }
 
-.explore-main-card.primary {
-  background: var(--color-primary);
-  color: #ffffff;
-  border-color: var(--color-primary);
-}
-
-.explore-main-card h2 {
-  margin: 0;
-  font-size: var(--text-base);
-  font-weight: 600;
-  line-height: var(--leading-snug);
-}
-
-.explore-main-card.primary h2 {
-  color: #ffffff;
-}
-
-.explore-main-card p {
-  margin: 3px 0 0;
-  font-size: var(--text-xs);
-  opacity: 0.9;
-  line-height: var(--leading-snug);
-}
-
-.explore-main-card:not(.primary) h2 {
-  color: var(--color-text-primary);
-}
-
-.explore-main-card:not(.primary) p {
-  color: var(--color-text-secondary);
-}
-
-.explore-topics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1.25rem;
-}
-
-.topic-card {
-  padding: 1.5rem;
+/* Icon Squircle (Matching Settings / iOS Control Center aesthetic) */
+.explore-setting-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  text-decoration: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.12s ease;
 }
 
-.topic-icon {
-  font-size: 1.75rem;
-  margin-bottom: 0.25rem;
+.explore-setting-icon.icon-emerald {
+  background: rgba(52, 199, 89, 0.14);
+  color: #34c759;
 }
 
-.topic-name {
-  font-size: 1rem;
+.explore-setting-icon.icon-rose {
+  background: rgba(255, 59, 48, 0.14);
+  color: #ff3b30;
+}
+
+.explore-setting-icon.icon-teal {
+  background: rgba(48, 176, 199, 0.14);
+  color: #30b0c7;
+}
+
+.explore-setting-icon.icon-purple {
+  background: rgba(175, 82, 222, 0.14);
+  color: #af52de;
+}
+
+.explore-setting-icon.icon-blue {
+  background: rgba(0, 122, 255, 0.14);
+  color: #007aff;
+}
+
+.explore-setting-icon.icon-gold {
+  background: rgba(255, 149, 0, 0.14);
+  color: #ff9500;
+}
+
+/* Featured Pill Tag */
+.explore-setting-pill {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, 0.14);
+  color: #34c759;
+  letter-spacing: -0.01em;
 }
 
-.topic-tamil {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.situations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 4rem;
-}
-
-.situation-card {
-  padding: 2rem;
+/* Category header with counter */
+.explore-category-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  text-align: center;
-  background: var(--color-bg-card);
-  text-decoration: none;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 4px 10px;
 }
 
-.situation-card .topic-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+/* Category Symbol Badge */
+.explore-cat-badge {
+  font-size: 13px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #1c1c1e;
+}
+
+/* Situations Emoji */
+.explore-situation-emoji {
+  font-size: 19px;
+  line-height: 1;
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .explore-cat-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .explore-setting-pill {
+  background: rgba(52, 199, 89, 0.2);
+  color: #34c759;
 }

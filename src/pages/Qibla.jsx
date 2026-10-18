@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2, Compass, MapPin, Navigation, RefreshCw,
-  RotateCcw, RotateCw, ShieldCheck, TriangleAlert,
+  ShieldCheck, TriangleAlert,
 } from 'lucide-react';
 import {
   calculateQiblaBearing, calculateTurnDirection, estimateMagneticDeclination,
   getAlignmentState, normalizeBearing, shortestAngleDifference, smoothHeading,
 } from '../services/qiblaCalculator';
 import { getUserLocation, watchUserLocation } from '../services/locationService';
+import BackButton from '../components/ui/BackButton';
 import './Qibla.css';
 
 const ALIGN_ENTER_THRESHOLD = 5;
@@ -151,8 +152,20 @@ export default function QiblaPage() {
       const rawHeading = headingFromEvent(event, declinationRef.current);
       if (rawHeading == null) return;
       received = true;
-      smoothRef.current = smoothHeading(smoothRef.current, rawHeading, 0.2);
-      setHeading(smoothRef.current);
+
+      if (smoothRef.current === null) {
+        smoothRef.current = rawHeading;
+        setHeading(rawHeading);
+      } else {
+        const diff = Math.abs(shortestAngleDifference(smoothRef.current, rawHeading));
+        // Deadband filter: ignore micro-jitters (< 0.6°) from handheld sensor noise
+        if (diff < 0.6) return;
+
+        // Dynamic smoothing: if user is turning quickly, respond faster; if holding still, dampen shakes
+        const alpha = diff > 8 ? 0.35 : 0.12;
+        smoothRef.current = smoothHeading(smoothRef.current, rawHeading, alpha);
+        setHeading(smoothRef.current);
+      }
       setCompassState('active');
     };
 
@@ -262,6 +275,7 @@ export default function QiblaPage() {
   if (isDesktop) {
     return (
       <main className="qibla-page qibla-centered-layout" id="main-content">
+        <BackButton fallback="/" label="Back" style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
         <section className="qibla-error-card">
           <div className="qibla-welcome-icon icon-error" aria-hidden="true">
             <Compass size={34} />
@@ -277,64 +291,44 @@ export default function QiblaPage() {
 
   if (locationState !== 'granted') {
     const hasLocationIssue = ['denied', 'error', 'unsupported'].includes(locationState);
-    return <main className="qibla-page qibla-centered-layout" id="main-content">
-      <section className={hasLocationIssue ? 'qibla-error-card' : 'qibla-welcome'}>
-        <div className={`qibla-welcome-icon${hasLocationIssue ? ' icon-error' : ''}`} aria-hidden="true">
-          {hasLocationIssue ? <TriangleAlert size={34} /> : <Navigation size={40} />}
-        </div>
-        <h1 className="qibla-welcome-title">{hasLocationIssue ? 'Location needed' : 'Find your Qibla'}</h1>
-        <p className="qibla-welcome-body">
-          {locationState === 'denied' ? 'Allow location access in browser settings, then try again. It is used only to calculate direction to Makkah.'
-            : locationState === 'unsupported' ? 'This browser cannot provide location, so a personal Qibla bearing cannot be calculated.'
-              : locationState === 'error' ? 'We could not get a reliable location. Check GPS or network access and try again.'
-                : 'Use your location to calculate the accurate direction to the Kaaba in Makkah. Your precise coordinates are not displayed.'}
-        </p>
-        <button className="btn btn-primary btn-lg" onClick={requestLocation} disabled={locationState === 'requesting'}>
-          <MapPin size={18} />{locationState === 'requesting' ? 'Finding location…' : hasLocationIssue ? 'Try again' : 'Use my location'}
-        </button>
-      </section>
-    </main>;
+    return (
+      <main className="qibla-page qibla-centered-layout" id="main-content">
+        <BackButton fallback="/" label="Back" style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
+        <section className={hasLocationIssue ? 'qibla-error-card' : 'qibla-welcome'}>
+          <div className={`qibla-welcome-icon${hasLocationIssue ? ' icon-error' : ''}`} aria-hidden="true">
+            {hasLocationIssue ? <TriangleAlert size={34} /> : <Navigation size={40} />}
+          </div>
+          <h1 className="qibla-welcome-title">{hasLocationIssue ? 'Location needed' : 'Find your Qibla'}</h1>
+          <p className="qibla-welcome-body">
+            {locationState === 'denied' ? 'Allow location access in browser settings, then try again. It is used only to calculate direction to Makkah.'
+              : locationState === 'unsupported' ? 'This browser cannot provide location, so a personal Qibla bearing cannot be calculated.'
+                : locationState === 'error' ? 'We could not get a reliable location. Check GPS or network access and try again.'
+                  : 'Use your location to calculate the accurate direction to the Kaaba in Makkah. Your precise coordinates are not displayed.'}
+          </p>
+          <button className="btn btn-primary btn-lg" onClick={requestLocation} disabled={locationState === 'requesting'}>
+            <MapPin size={18} />{locationState === 'requesting' ? 'Finding location…' : hasLocationIssue ? 'Try again' : 'Use my location'}
+          </button>
+        </section>
+      </main>
+    );
   }
 
-  const remainingDegrees = turnInfo?.degrees ?? (angularDifference != null ? Math.round(angularDifference) : 0);
-  const isTurnAnticlockwise = turnInfo?.direction === 'anticlockwise';
 
-  const status = alignment === 'aligned'
-    ? { title: 'Facing Qibla', body: 'You are within 5° of the Qibla direction.', icon: CheckCircle2 }
-    : alignment === 'near'
-      ? {
-          title: 'Almost there',
-          body: `${remainingDegrees}° remaining. Keep rotating ${isTurnAnticlockwise ? 'anticlockwise' : 'clockwise'} slowly.`,
-          icon: isTurnAnticlockwise ? RotateCcw : RotateCw,
-        }
-      : liveCompass
-        ? {
-            title: isTurnAnticlockwise ? 'Rotate anticlockwise toward Qibla' : 'Rotate clockwise toward Qibla',
-            body: `${remainingDegrees}° remaining. Align the gold pointer with the top marker.`,
-            icon: isTurnAnticlockwise ? RotateCcw : RotateCw,
-          }
-        : { title: 'Compass not active', body: 'Enable your phone compass for live direction guidance.', icon: Compass };
-  const StatusIcon = status.icon;
-
-  return <main className="qibla-page qibla-app-layout" id="main-content" aria-label="Qibla direction">
-    <CompassDial heading={liveCompass ? heading : null} qiblaBearing={qiblaBearing} alignment={alignment} />
-    <section className={`qibla-status qibla-status-${alignment}`} aria-live="polite">
-      <StatusIcon size={21} aria-hidden="true" /><div><h2>{status.title}</h2><p>{status.body}</p></div>
-    </section>
-    <section className="qibla-readings" aria-label="Qibla readings">
-      <div><span>Qibla bearing</span><strong>{displayBearing != null ? `${displayBearing}°` : '—'}</strong><small>from North</small></div>
-      <div><span>Current heading</span><strong>{displayHeading != null ? `${displayHeading}°` : '—'}</strong><small>{liveCompass ? 'live compass' : 'not available'}</small></div>
-    </section>
-    {!liveCompass && <section className="qibla-sensor-card">
-      <ShieldCheck size={19} aria-hidden="true" /><div>
-        <h2>{compassState === 'unavailable' ? 'Live compass unavailable' : compassState === 'denied' ? 'Compass permission denied' : 'Enable live compass'}</h2>
-        <p>{compassState === 'unavailable'
-          ? 'This browser did not provide a verified compass heading. Use the bearing above with a physical compass; we will not guess your direction.'
-          : 'For live guidance, keep your phone flat and allow motion and orientation access.'}</p>
-        <button className={`btn ${compassState === 'unavailable' ? 'btn-secondary' : 'btn-primary'}`} onClick={startCompass}>
-          {compassState === 'unavailable' ? <RefreshCw size={16} /> : <Compass size={16} />}{compassState === 'unavailable' ? 'Try compass again' : 'Enable compass'}
-        </button>
-      </div>
-    </section>}
-  </main>;
+  return (
+    <main className="qibla-page qibla-app-layout" id="main-content" aria-label="Qibla direction">
+      <BackButton fallback="/" label="Back" style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} />
+      <CompassDial heading={liveCompass ? heading : null} qiblaBearing={qiblaBearing} alignment={alignment} />
+      {!liveCompass && <section className="qibla-sensor-card">
+        <ShieldCheck size={19} aria-hidden="true" /><div>
+          <h2>{compassState === 'unavailable' ? 'Live compass unavailable' : compassState === 'denied' ? 'Compass permission denied' : 'Enable live compass'}</h2>
+          <p>{compassState === 'unavailable'
+            ? 'This browser did not provide a verified compass heading. Use a physical compass; we will not guess your direction.'
+            : 'For live guidance, keep your phone flat and allow motion and orientation access.'}</p>
+          <button className={`btn ${compassState === 'unavailable' ? 'btn-secondary' : 'btn-primary'}`} onClick={startCompass}>
+            {compassState === 'unavailable' ? <RefreshCw size={16} /> : <Compass size={16} />}{compassState === 'unavailable' ? 'Try compass again' : 'Enable compass'}
+          </button>
+        </div>
+      </section>}
+    </main>
+  );
 }

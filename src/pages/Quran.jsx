@@ -9,7 +9,7 @@ import PageHero from '../components/PageHero';
 import quranBanner from '../assets/quran-banner.svg';
 import tamilSurahs from '../data/tamil_surahs.json';
 import FriendlyError from '../components/ui/FriendlyError';
-import { parseError } from '../utils/errorHandling';
+import { parseError, getFriendlyAudioErrorMessage } from '../utils/errorHandling';
 import './Quran.css';
 
 //  Skeleton 
@@ -57,6 +57,7 @@ function SurahList() {
     setFiltered(surahs.filter(s =>
       s.name_simple?.toLowerCase().includes(q) ||
       s.name_arabic?.includes(query) ||
+      tamilSurahs[s.id]?.toLowerCase().includes(q) ||
       s.translated_name?.name?.toLowerCase().includes(q) ||
       String(s.id) === query.trim()
     ));
@@ -123,10 +124,9 @@ function SurahList() {
                 <div className="surah-info">
                   <div className="surah-name-row">
                     <span className="surah-name-en">{surah.name_simple}</span>
-                    <span className="surah-meaning">{tamilSurahs[surah.id] || surah.translated_name?.name}</span>
                   </div>
                   <div className="surah-meta-row">
-                    <span className="surah-ayah-count">{surah.verses_count} Ayahs</span>
+                    <span className="surah-meaning">{tamilSurahs[surah.id] || surah.translated_name?.name}</span>
                   </div>
                 </div>
                 <span className="surah-arabic arabic-text notranslate" dir="rtl" translate="no">{surah.name_arabic}</span>
@@ -190,17 +190,36 @@ function SurahDetail({ surahId }) {
     setShowDeleteConfirm(false);
   };
 
+  const [isChangingPage, setIsChangingPage] = useState(false);
+
   useEffect(() => {
-    window.scrollTo(0, 0);
-    setLoading(true);
+    let active = true;
+    // If we already have ayahs, keep them visible and show a subtle indicator instead of clearing to blank
+    if (ayahs.length > 0) {
+      setIsChangingPage(true);
+    } else {
+      setLoading(true);
+    }
+
     Promise.all([getSurah(surahId), getAyahs(surahId, { page })])
       .then(([s, { verses, pagination: pg }]) => {
+        if (!active) return;
         setSurah(s);
         setAyahs(verses);
         setPagination(pg);
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       })
-      .catch(e => setError(parseError(e, 'Quran Verses')))
-      .finally(() => setLoading(false));
+      .catch(e => {
+        if (!active) return;
+        setError(parseError(e, 'Quran Verses'));
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoading(false);
+        setIsChangingPage(false);
+      });
+
+    return () => { active = false; };
   }, [surahId, page]);
 
   useEffect(() => {
@@ -215,7 +234,7 @@ function SurahDetail({ surahId }) {
     getSurahAyahAudio(surahId, selectedReciterId)
       .then(tracks => { if (!cancelled) setAudioTracks(tracks); })
       .catch(e => {
-        if (!cancelled) setAudioError(e.message);
+        if (!cancelled) setAudioError(getFriendlyAudioErrorMessage(e));
       })
       .finally(() => {
         if (!cancelled) setAudioLoading(false);
@@ -287,7 +306,9 @@ function SurahDetail({ surahId }) {
       audio.src = url;
       await audio.play();
     } catch(e) {
-      setAudioError(`Unable to play Ayah ${track.verseKey}: ${e.message}`);
+      if (e.name !== 'AbortError') {
+        setAudioError(getFriendlyAudioErrorMessage(e));
+      }
       setIsPlaying(false);
     }
   };
@@ -362,69 +383,81 @@ function SurahDetail({ surahId }) {
           <ArrowLeft size={16} /> All Surahs
         </Link>
 
-        {/* Surah header */}
+        {/* Surah header / Surah Info Card */}
         {surah && (
           <div className="surah-detail-header">
-            <div className="surah-detail-meta">
-              <span className="badge badge-primary">Surah {surah.id}</span>
-              <span className="badge badge-unknown">{surah.verses_count} Ayahs</span>
-            </div>
-            <h1 className="surah-detail-name arabic-text notranslate" dir="rtl" translate="no">{surah.name_arabic}</h1>
-            <p className="surah-detail-name-en">{surah.name_simple} — {tamilSurahs[surah.id] || surah.translated_name?.name}</p>
-
-            {/* Bismillah (not for Al-Fatiha or At-Tawbah) */}
-            {surah.id !== 1 && surah.id !== 9 && (
-              <p className="bismillah arabic-text notranslate" dir="rtl" translate="no">
-                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-              </p>
-            )}
-
-            {/* Quran recitation audio player */}
+            {/* Quran recitation audio player & Surah Info Card */}
             <div className="surah-audio-player">
-              <div className="surah-audio-info">
-                <span className="quran-reciter-label">Choose reciter</span>
-                <ReciterPicker
-                  reciters={QURAN_RECITERS}
-                  value={selectedReciterId}
-                  onChange={setSelectedReciterId}
-                  label="Choose Quran reciter"
-                />
-                <p className="surah-audio-status">
-                  {audioLoading
-                    ? 'Loading recitation...'
-                    : playingIndex >= 0
-                      ? audioTracks[playingIndex]?.isSurahAudio
-                        ? `Playing Surah ${surahId}`
-                        : `Playing Ayah ${audioTracks[playingIndex]?.verseKey}`
-                      : audioTracks[0]?.isSurahAudio ? 'Full-Surah Recitation' : 'Ayah-by-Ayah Recitation'}
-                </p>
-                <div className="surah-audio-download" style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                  {downloadState.status === 'none' || downloadState.status === 'error' ? (
-                    <button className="btn btn-secondary btn-sm" onClick={handleDownload} title="Download Surah text and audio for offline reading" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>
-                      <DownloadCloud size={14} style={{ marginRight: 4 }} /> Download Offline
-                    </button>
-                  ) : downloadState.status === 'downloading' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span className="spinning" style={{ display: 'inline-block' }}><RefreshCw size={14} /></span> 
-                      Downloading {downloadState.progress}%
-                    </div>
-                  ) : downloadState.status === 'downloaded' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <CheckCircle size={14} color="var(--color-primary)" /> Available Offline
-                      <button className="btn-icon" onClick={handleDeleteDownload} title="Delete download" style={{ marginLeft: 4, padding: 4 }}>
-                        <Trash2 size={12} color="#e88080" />
+              <div className="surah-info-card" id="surah-info-card">
+                <div className="surah-info-card-top">
+                  <div className="surah-info-badges">
+                    <span className="badge badge-primary">Surah {surah.id}</span>
+                    <span className="badge badge-unknown">{surah.verses_count} Ayahs</span>
+                    {surah.revelation_place && (
+                      <span className={`badge ${surah.revelation_place === 'makkah' ? 'badge-gold' : 'badge-primary'}`}>
+                        {surah.revelation_place === 'makkah' ? 'Makki' : 'Madani'}
+                      </span>
+                    )}
+                  </div>
+                  <h1 className="surah-info-arabic arabic-text notranslate" dir="rtl" translate="no" lang="ar">
+                    {surah.name_arabic}
+                  </h1>
+                  <p className="surah-info-names">
+                    <span className="surah-info-name-en">{surah.name_simple}</span>
+                    {(tamilSurahs[surah.id] || surah.translated_name?.name) && (
+                      <span className="surah-info-name-ta">
+                        &nbsp;·&nbsp;{tamilSurahs[surah.id] || surah.translated_name?.name}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="surah-info-card-bottom">
+                  <div className="surah-info-reciter-row">
+                    <span className="surah-info-reciter-label">Reciter</span>
+                    <ReciterPicker
+                      reciters={QURAN_RECITERS}
+                      value={selectedReciterId}
+                      onChange={setSelectedReciterId}
+                      label="Choose Quran reciter"
+                    />
+                  </div>
+                  <p className="surah-audio-status">
+                    {audioLoading
+                      ? 'Loading recitation...'
+                      : playingIndex >= 0
+                        ? audioTracks[playingIndex]?.isSurahAudio
+                          ? `Playing Surah ${surahId}`
+                          : `Playing Ayah ${audioTracks[playingIndex]?.verseKey}`
+                        : audioTracks[0]?.isSurahAudio ? 'Full-Surah Recitation' : 'Ayah-by-Ayah Recitation'}
+                  </p>
+                  <div className="surah-audio-download" style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                    {downloadState.status === 'none' || downloadState.status === 'error' ? (
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={handleDownload} title="Download Surah text and audio for offline reading">
+                        <DownloadCloud size={14} style={{ marginRight: 4 }} /> Download Offline
                       </button>
-                    </div>
-                  ) : null}
-                  {downloadState.status === 'error' && <span style={{ color: '#e88080' }}>Failed. Try again.</span>}
+                    ) : downloadState.status === 'downloading' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="spinning" style={{ display: 'inline-block' }}><RefreshCw size={14} /></span> 
+                        Downloading {downloadState.progress}%
+                      </div>
+                    ) : downloadState.status === 'downloaded' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <CheckCircle size={14} color="var(--color-primary)" /> Available Offline
+                        <button type="button" className="btn-icon btn-icon-danger btn-sm" onClick={handleDeleteDownload} title="Delete download" aria-label="Delete download" style={{ marginLeft: 4 }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ) : null}
+                    {downloadState.status === 'error' && <span style={{ color: '#e88080' }}>Failed. Try again.</span>}
+                  </div>
                 </div>
               </div>
+              {/* Play/Pause button */}
               <button
-                className="btn btn-primary"
+                className="btn btn-primary surah-play-btn"
                 onClick={togglePlay}
                 disabled={audioTracks.length === 0 || audioLoading}
                 aria-label={isPlaying ? 'Pause recitation' : 'Play recitation'}
-                style={{ borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               >
                 {isPlaying ? (
                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
@@ -445,19 +478,23 @@ function SurahDetail({ surahId }) {
                 setAudioError('');
               }}
               onError={() => {
-                const audioErrorCode = audioRef.current?.error?.code;
-                if (audioErrorCode) {
-                  setAudioError(`Recitation audio failed to load (media error ${audioErrorCode}).`);
-                  setIsPlaying(false);
-                }
+                setAudioError('Audio recitation could not be loaded. Please check your connection and try again.');
+                setIsPlaying(false);
               }}
               preload="none"
             />
+
+            {/* Bismillah (not for Al-Fatiha or At-Tawbah) */}
+            {surah.id !== 1 && surah.id !== 9 && (
+              <p className="bismillah arabic-text notranslate" dir="rtl" translate="no">
+                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+              </p>
+            )}
           </div>
         )}
 
         {/* Ayahs */}
-        <div className="ayahs-list">
+        <div className="ayahs-list" style={{ opacity: isChangingPage ? 0.6 : 1, transition: 'opacity 0.2s ease', position: 'relative' }}>
           {loading
             ? Array(5).fill(0).map((_, i) => <AyahSkeleton key={i} />)
             : ayahs.map(ayah => {

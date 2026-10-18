@@ -2,20 +2,27 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { RotateCcw, Plus, Loader2 } from 'lucide-react';
 import { fetchDhikrData, getDhikrBySession } from '../services/dhikr';
+import { useLang } from '../context/AppContext';
 import PageHero from '../components/PageHero';
 import dhikrBanner from '../assets/dhikr-banner.svg';
 import FriendlyError from '../components/ui/FriendlyError';
 import { parseError } from '../utils/errorHandling';
+import BackButton from '../components/ui/BackButton';
 import './Dhikr.css';
 
 export default function Dhikr() {
   const [session, setSession] = useState('after-prayer');
   const [dhikrs, setDhikrs] = useState([]);
   const [counts, setCounts] = useState({});
+  const { t } = useLang();
 
-  const [allDhikrs, setAllDhikrs] = useState([]);
+  const [allDhikrs, setAllDhikrs] = useState(() => {
+    try {
+      return (fetchDhikrData && typeof fetchDhikrData === 'function') ? [] : [];
+    } catch { return []; }
+  });
   const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -26,7 +33,7 @@ export default function Dhikr() {
     } catch { /* ignore */ }
 
     async function loadData() {
-      setLoading(true);
+      if (allDhikrs.length === 0) setLoading(true);
       setError(null);
       try {
         const data = await fetchDhikrData();
@@ -78,22 +85,25 @@ export default function Dhikr() {
   return (
     <main className="page-wrapper fade-in" id="main-content">
       <div className="container" style={{ maxWidth: '800px' }}>
+        <div className="app-top-nav">
+          <BackButton fallback="/" label={t('back')} />
+        </div>
         <PageHero
           image={dhikrBanner}
-          title="Dhikr Counter"
-          description="திக்ர் கவுண்டர் — அல்லாஹ்வை நினைவுகூருதல்"
+          title={t('dhikrCounter')}
+          description={t('dhikrDesc')}
           className="dhikr-page-hero"
         />
         <div className="dhikr-hero-actions">
           <Link to="/after-salah" className="btn btn-primary dhikr-hero-action">
-            After Salah Dhikr
+            {t('afterSalahDhikr')}
           </Link>
         </div>
 
         {loading ? (
           <div className="loader-container">
             <Loader2 className="spinner" size={32} />
-            <p>Loading dhikr...</p>
+            <p>{t('loadingDhikr')}</p>
           </div>
         ) : error ? (
           <div style={{ marginBottom: '2rem' }}>
@@ -115,15 +125,15 @@ export default function Dhikr() {
                   onClick={() => setSession(s.id)}
                 >
                   <span className="ds-name">{s.name}</span>
-                  <span className="ds-tamil tamil-text">{s.tamil}</span>
+                  {s.tamil && <span className="ds-tamil tamil-text">{s.tamil}</span>}
                 </button>
               ))}
             </div>
 
             <div className="dhikr-progress-bar">
               <div className="dhikr-progress-text">
-                <span>Session Progress</span>
-                <span>{totalCompleted} / {dhikrs.length} completed</span>
+                <span>{t('sessionProgress')}</span>
+                <span>{totalCompleted} / {dhikrs.length} {t('completed')}</span>
               </div>
               <div className="dhikr-progress-track">
                 <div 
@@ -131,9 +141,9 @@ export default function Dhikr() {
                   style={{ width: `${dhikrs.length ? (totalCompleted / dhikrs.length) * 100 : 0}%` }}
                 />
               </div>
-              {isAllCompleted && <p className="dhikr-completed-msg">Mashallah! Session completed.</p>}
+              {isAllCompleted && <p className="dhikr-completed-msg">{t('mashallah')}</p>}
               <button className="btn btn-ghost btn-sm" onClick={resetAll} style={{ marginTop: '1rem' }}>
-                <RotateCcw size={14} /> Reset Session
+                <RotateCcw size={14} /> {t('resetSession')}
               </button>
             </div>
 
@@ -163,14 +173,14 @@ export default function Dhikr() {
                           className={`dhikr-tap-btn${isDone ? ' done' : ''}`}
                           onClick={() => updateCount(dhikr.id, true)}
                           disabled={isDone}
-                          aria-label="Count"
+                          aria-label={t('completed')}
                         >
-                          {isDone ? 'Completed' : <Plus size={32} />}
+                          {isDone ? t('completed') : <Plus size={32} />}
                         </button>
                         <button 
                           className="dhikr-reset-btn" 
                           onClick={() => updateCount(dhikr.id, false)}
-                          aria-label="Reset"
+                          aria-label={t('resetSession')}
                         >
                           <RotateCcw size={18} />
                         </button>

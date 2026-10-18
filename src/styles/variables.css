@@ -136,6 +136,33 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left:   env(safe-area-inset-left,   0px);
 
+  /* --- BUTTON DESIGN TOKENS --- */
+  --btn-height-sm: 36px;
+  --btn-height-md: 44px;
+  --btn-height-lg: 50px;
+  --btn-touch-min: 44px;
+
+  --btn-padding-sm: 0 14px;
+  --btn-padding-md: 0 20px;
+  --btn-padding-lg: 0 28px;
+  --btn-padding-icon: 10px;
+
+  --btn-radius-sm: 8px;
+  --btn-radius-md: 10px;
+  --btn-radius-lg: 14px;
+  --btn-radius-pill: 9999px;
+
+  --btn-font-size-sm: 0.8125rem; /* 13px */
+  --btn-font-size-md: 0.9375rem; /* 15px */
+  --btn-font-size-lg: 1rem;      /* 16px */
+  --btn-font-weight: 600;
+  --btn-letter-spacing: -0.01em;
+
+  --btn-danger-bg: #c0392b;
+  --btn-danger-text: #ffffff;
+  --btn-danger-subtle-bg: rgba(192, 57, 43, 0.08);
+  --btn-danger-subtle-text: #c0392b;
+
   /* Total vertical space the top navbar occupies including the status bar.
      On Android edge-to-edge this equals 64px + status-bar-height. */
   --navbar-total: calc(var(--navbar-height) + env(safe-area-inset-top, 0px));
@@ -176,4 +203,7 @@
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25);
   --shadow-card: 0 1px 4px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
   --shadow-card-hover: 0 4px 20px rgba(0,0,0,0.5);
+
+  --btn-danger-subtle-bg: rgba(235, 87, 87, 0.16);
+  --btn-danger-subtle-text: #ff6b6b;
 }

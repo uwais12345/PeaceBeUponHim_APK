@@ -1,0 +1,574 @@
+/* ================================================================
+   MUSHAF READER  —  13-Line Traditional Quran Page Layout
+   v3: Dynamic font-size for 13 lines, book-scroll animation,
+       fixed separator lines, always-visible back button.
+   ================================================================ */
+
+/* Scheherazade New Bold = heavier print weight like printed Mushaf
+   Amiri Quran           = precise diacritic rendering fallback     */
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap');
+
+/* ────────────────────────────────────────────────────────────────
+   ROOT — full-screen flex column layout
+──────────────────────────────────────────────────────────────── */
+.mf-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: #f5f0e8;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  padding-top:    env(safe-area-inset-top,    0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DEDICATED TOP NAVIGATION BAR (Outside Mushaf page - NO overlap)
+──────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────
+   TOP NAV BAR — Simple, Professional, Modern & Clean
+──────────────────────────────────────────────────────────────── */
+.mf-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: #0e3a2d;
+  flex-shrink: 0;
+  z-index: 100;
+  height: 52px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* Crisp Circular Icon Buttons (Back & Bookmark) */
+.mf-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+.mf-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+.mf-icon-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Bookmark active warm-gold state */
+.mf-bm-btn.is-active {
+  background: rgba(232, 185, 106, 0.18);
+  border-color: rgba(232, 185, 106, 0.45);
+  color: #e8b96a;
+}
+
+/* Center Unified Navigation Pill */
+.mf-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 2px 4px;
+  gap: 2px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.mf-pill-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+.mf-pill-arrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+.mf-pill-arrow:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(0.9);
+}
+.mf-pill-arrow:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.mf-pill-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 8px;
+  user-select: none;
+}
+
+.mf-pill-page {
+  font-family: 'Amiri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.mf-pill-juz {
+  font-family: 'Amiri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #e8b96a;
+  background: rgba(232, 185, 106, 0.15);
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 185, 106, 0.25);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STAGE — Framed area leaving breathing space around Mushaf page
+──────────────────────────────────────────────────────────────── */
+.mf-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  background: #f5f0e8;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PAGE WRAPPER  — book-scroll animation container
+──────────────────────────────────────────────────────────────── */
+.mf-page-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  position: relative;
+  /* Perspective for the 3D book animation */
+  perspective: 1400px;
+}
+
+/* Loading fade */
+.mf-page-wrap.mf-loading { opacity: 0; pointer-events: none; }
+.mf-page-wrap.mf-ready   { opacity: 1; }
+
+/* ── Authentic Arabic RTL Mushaf Page Turn Transitions ──
+   • Forward (Next Page / Swipe Right-to-Left):
+     Enters from the right, pivoting smoothly along the Arabic right-side spine.
+   • Backward (Previous Page / Swipe Left-to-Right):
+     Returns from the left, sweeping gracefully back into view.
+*/
+.mf-page-wrap.mf-ready.mf-dir-fwd {
+  transform-origin: right center;
+  animation: mf-arabic-turn-fwd 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mf-page-wrap.mf-ready.mf-dir-bwd {
+  transform-origin: left center;
+  animation: mf-arabic-turn-bwd 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mf-arabic-turn-fwd {
+  0% {
+    opacity: 0.1;
+    transform: perspective(1400px) rotateY(-12deg) translateX(36px) scale(0.985);
+    box-shadow: -18px 0 32px rgba(0, 0, 0, 0.16);
+  }
+  65% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(-2deg) translateX(4px) scale(0.998);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) translateX(0) scale(1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@keyframes mf-arabic-turn-bwd {
+  0% {
+    opacity: 0.1;
+    transform: perspective(1400px) rotateY(12deg) translateX(-36px) scale(0.985);
+    box-shadow: 18px 0 32px rgba(0, 0, 0, 0.16);
+  }
+  65% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(2deg) translateX(-4px) scale(0.998);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) translateX(0) scale(1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-page-wrap.mf-ready.mf-dir-fwd,
+  .mf-page-wrap.mf-ready.mf-dir-bwd {
+    animation: none;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   THE MUSHAF PAGE — parchment rectangle with double border
+──────────────────────────────────────────────────────────────── */
+.mf-page {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #fdf8ee;
+  /* Double border like printed Mushaf */
+  border: 2px solid #b8902a;
+  outline: 5px solid #b8902a;
+  outline-offset: -9px;
+  border-radius: 4px;
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.55),
+    inset 4px 0 8px rgba(0,0,0,0.06),
+    inset 0 0 0 10px #fdf8ee;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PAGE HEADER / FOOTER
+──────────────────────────────────────────────────────────────── */
+.mf-page-header,
+.mf-page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  direction: rtl;
+  padding: 3px 14px 2px;
+  flex-shrink: 0;
+}
+
+.mf-hdr-juz {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  font-size: clamp(9px, 2.2vw, 12px);
+  color: #5a3e1b;
+  direction: rtl;
+  flex: 1;
+  text-align: start;
+}
+
+.mf-hdr-pagenum {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  font-size: clamp(10px, 2.5vw, 14px);
+  font-weight: 700;
+  color: #3a2200;
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 32px;
+}
+
+.mf-hdr-surah {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  font-size: clamp(9px, 2.2vw, 12px);
+  color: #5a3e1b;
+  direction: rtl;
+  flex: 1;
+  text-align: end;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DECORATIVE GOLD RULE
+──────────────────────────────────────────────────────────────── */
+.mf-rule {
+  height: 1px;
+  margin: 0 12px;
+  background: linear-gradient(90deg,
+    transparent 0%, #b8902a 8%, #d4b050 50%, #b8902a 92%, transparent 100%
+  );
+  flex-shrink: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TEXT BODY — scrollable if needed with bottom padding (last line safe)
+──────────────────────────────────────────────────────────────── */
+.mf-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 6px 14px 20px;
+  overscroll-behavior-y: contain;
+
+  /* ── Horizontal line separators ──
+     Position lines in the GAP below text (not through diacritics).
+     With line-height 1.85em:
+       • Arabic text + diacritics occupy  ≈ 0em – 1.15em
+       • Safe gap for separator           ≈ 1.5em – 1.75em
+     The gradient repeats every 1.85em (one full line row).         */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent              0,
+    transparent              1.5em,
+    rgba(160, 130, 60, 0.16) 1.5em,
+    rgba(160, 130, 60, 0.16) 1.56em,
+    transparent              1.56em,
+    transparent              1.85em
+  );
+  background-attachment: local;
+  background-position: 0 6px; /* align with top padding */
+}
+.mf-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   QURAN TEXT — dynamically sized for 13 lines
+──────────────────────────────────────────────────────────────── */
+.mf-text {
+  direction: rtl;
+  text-align: justify;
+  text-justify: inter-word;
+  font-family: 'Scheherazade New', 'Amiri Quran', 'Amiri',
+               'KFGQPC Uthmanic Script Hafs', 'Traditional Arabic', serif;
+  font-weight: 700;
+  /* Use the JS-calculated variable; fallback to viewport-based clamp */
+  font-size: var(--mf-fs, clamp(21px, 5.2vw, 30px));
+  /* MUST match the 1.85em used in body gradient */
+  line-height: 1.85;
+  /* Near-black — maximum contrast on parchment */
+  color: #080200;
+  word-spacing: 0.03em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Surah segment ── */
+.mf-segment { margin-bottom: 0; }
+
+/* ── Surah header banner ── */
+.mf-surah-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 2px 2px;
+  background: linear-gradient(135deg, #8b6914 0%, #c8992a 30%, #e8c050 50%, #c8992a 70%, #8b6914 100%);
+  border: 1.5px solid #a07820;
+  border-radius: 5px;
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+.mf-banner-ornament {
+  font-family: 'Amiri', serif;
+  font-size: clamp(14px, 3.5vw, 20px);
+  color: rgba(255,255,255,0.65);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.mf-banner-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+}
+
+.mf-banner-name {
+  font-family: 'Scheherazade New', 'Amiri Quran', 'Amiri', serif;
+  font-size: clamp(13px, 3.3vw, 19px);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  direction: rtl;
+  line-height: 1.3;
+}
+
+.mf-banner-meta {
+  font-family: 'Amiri', serif;
+  font-size: clamp(9px, 2.2vw, 12px);
+  color: rgba(255,255,255,0.8);
+  direction: rtl;
+  line-height: 1.2;
+}
+
+/* ── Bismillah ── */
+.mf-bismillah {
+  text-align: center;
+  font-family: 'Scheherazade New', 'Amiri Quran', 'Amiri', serif;
+  font-weight: 700;
+  /* Slightly smaller than body text so it fits on one line */
+  font-size: var(--mf-fs, clamp(19px, 4.8vw, 28px));
+  color: #080200;
+  line-height: 1.85;
+  direction: rtl;
+  margin: 0;
+}
+
+/* ── Ayah flow ── */
+.mf-ayahs { display: inline; }
+.mf-ayah  { display: inline; }
+
+/* First ayah highlight (gold wash) */
+.mf-ayah-first {
+  background: linear-gradient(to bottom, rgba(200,160,40,0.2), rgba(200,160,40,0.08));
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ── Ayah end marker U+06DD ── */
+.mf-ayah-mark {
+  display: inline-block;
+  font-family: 'Scheherazade New', 'Amiri Quran', 'Amiri', serif;
+  /* Larger circle marker — more visible like reference */
+  font-size: 0.78em;
+  color: #7a3800;
+  margin: 0 3px;
+  vertical-align: middle;
+  line-height: 1;
+  direction: rtl;
+  background: radial-gradient(circle, rgba(160,90,10,0.15) 55%, transparent 100%);
+  border-radius: 50%;
+  padding: 0 2px;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LOADING / ERROR
+──────────────────────────────────────────────────────────────── */
+.mf-loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.mf-loading-text {
+  text-align: center;
+  font-family: 'Amiri', serif;
+  font-size: 16px;
+  color: #8b7355;
+  padding-top: 2rem;
+  direction: rtl;
+}
+
+.mf-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #8b4513;
+  font-family: 'Amiri', serif;
+  font-size: 15px;
+  direction: rtl;
+  padding-top: 1.5rem;
+}
+.mf-error button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  background: var(--color-primary, #1a6b3a);
+  color: #ffffff;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: none;
+  font-family: var(--font-arabic, 'Amiri', serif);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.15s ease, transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mf-error button:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DARK THEME
+──────────────────────────────────────────────────────────────── */
+[data-theme='dark'] .mf-root   { background: #0c0904; }
+[data-theme='dark'] .mf-topbar {
+  background: #080503;
+  border-bottom-color: rgba(200, 160, 60, 0.25);
+}
+[data-theme='dark'] .mf-page {
+  background: #18130a;
+  border-color: rgba(200,160,60,0.5);
+  outline-color: rgba(200,160,60,0.5);
+  box-shadow:
+    0 6px 24px rgba(0,0,0,0.7),
+    inset 4px 0 8px rgba(0,0,0,0.12),
+    inset 0 0 0 10px #18130a;
+}
+[data-theme='dark'] .mf-hdr-juz,
+[data-theme='dark'] .mf-hdr-surah  { color: #b89840; }
+[data-theme='dark'] .mf-hdr-pagenum { color: #d8b860; }
+[data-theme='dark'] .mf-text       { color: #e8d8a8; }
+[data-theme='dark'] .mf-bismillah  { color: #e8d8a8; }
+[data-theme='dark'] .mf-ayah-mark  { color: #c08030; background: radial-gradient(circle, rgba(160,90,10,0.1) 55%, transparent 100%); }
+[data-theme='dark'] .mf-loading-text { color: #8b7844; }
+[data-theme='dark'] .mf-body {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent              0,
+    transparent              1.5em,
+    rgba(180, 140, 60, 0.1) 1.5em,
+    rgba(180, 140, 60, 0.1) 1.56em,
+    transparent              1.56em,
+    transparent              1.85em
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   RESPONSIVE
+──────────────────────────────────────────────────────────────── */
+/* Landscape phones */
+@media (max-height: 520px) {
+  .mf-stage { padding: 4px 8px 8px; }
+  .mf-page-header,
+  .mf-page-footer { padding: 2px 12px; }
+}
+
+/* Tablets / desktop */
+@media (min-width: 600px) {
+  .mf-stage { padding: 16px 24px 24px; }
+  .mf-page {
+    max-width: 520px;
+  }
+}
+@media (min-width: 900px) {
+  .mf-page { max-width: 580px; }
+}

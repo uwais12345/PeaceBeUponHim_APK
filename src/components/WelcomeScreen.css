@@ -1,23 +1,34 @@
 .welcome-screen {
   position: fixed;
-  z-index: 1000;
+  z-index: 99999;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: center;
   width: 100%;
+  height: 100%;
   min-height: 100vh;
   min-height: 100svh;
   min-height: 100dvh;
   overflow: hidden;
   color: #fff;
   background: #0e382b;
+  transition: opacity 0.5s ease-out;
+  will-change: opacity;
+  box-sizing: border-box;
+}
+
+.welcome-screen-fadeout {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .welcome-hero {
   position: absolute;
-  inset: 0 0 auto;
-  height: 72%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -31,33 +42,30 @@
 
 .welcome-hero img {
   object-fit: cover;
-  object-position: center 42%;
+  object-position: center 30%;
   transform: scale(1.02);
 }
 
 .welcome-vignette {
   background: linear-gradient(
     180deg,
-    rgb(14 56 43 / 12%) 0%,
-    rgb(14 56 43 / 5%) 38%,
-    rgb(14 56 43 / 48%) 68%,
-    rgb(14 56 43 / 88%) 86%,
+    rgba(14, 56, 43, 0.25) 0%,
+    rgba(14, 56, 43, 0.15) 30%,
+    rgba(14, 56, 43, 0.65) 60%,
+    rgba(14, 56, 43, 0.94) 80%,
     #0e382b 100%
   );
 }
 
 .welcome-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   width: 100%;
+  max-width: 420px;
   flex-direction: column;
   align-items: center;
-  /* Horizontal safe-area for cutout phones; vertical for home indicator */
-  padding: 0
-    max(28px, env(safe-area-inset-right, 0px))
-    max(12px, env(safe-area-inset-bottom, 0px))
-    max(28px, env(safe-area-inset-left, 0px));
+  padding: 0 24px max(32px, env(safe-area-inset-bottom, 24px));
   text-align: center;
   box-sizing: border-box;
 }
@@ -66,41 +74,42 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .welcome-logo {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  margin-bottom: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  margin-bottom: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  object-fit: cover;
 }
 
 .welcome-app-name {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: #e9a825;
   letter-spacing: 0.02em;
 }
 
 .welcome-content h1 {
-  margin: 0 0 8px;
-  color: #fff;
-  font-size: clamp(1.75rem, 7vw, 2.1rem);
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-size: clamp(1.6rem, 6.5vw, 2rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.2;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
 }
 
 .welcome-content p {
-  max-width: 280px;
-  margin: 0 0 40px;
+  max-width: 290px;
+  margin: 0 0 24px;
   color: #a8c0b4;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .welcome-start {
@@ -109,84 +118,61 @@
   justify-content: center;
   gap: 10px;
   width: 100%;
-  min-height: 64px;
-  border-radius: 16px;
+  max-width: 290px;
+  min-height: 52px;
+  border-radius: 999px;
   color: #14231b;
   background: #f5a623;
-  box-shadow: 0 8px 20px rgb(70 42 5 / 22%);
-  font-size: 17px;
+  box-shadow: 0 6px 18px rgba(70, 42, 5, 0.25);
+  font-size: 16px;
   font-weight: 700;
+  box-sizing: border-box;
+}
+
+/* Strictly non-interactive loading badge */
+.welcome-loading-badge {
+  pointer-events: none !important;
+  user-select: none !important;
+  cursor: default !important;
+  outline: none !important;
+}
+
+/* Interactive retry button */
+.welcome-retry-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  border: none;
   transition: background-color 150ms ease, transform 150ms ease;
 }
 
-.welcome-start:hover {
+.welcome-retry-btn:hover {
   background: #e99a1d;
 }
 
-.welcome-start:active {
+.welcome-retry-btn:active {
   transform: scale(0.98);
 }
 
-.welcome-start:focus-visible {
+.welcome-retry-btn:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
 }
 
-.welcome-home-indicator {
+.welcome-error-wrap {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  justify-content: center;
-  padding-top: 35px;
 }
 
-.welcome-home-indicator span {
-  width: 128px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 85%);
-}
-
-@media (min-width: 600px) {
-  .welcome-screen {
-    inset: 3vh auto;
-    left: 50%;
-    width: min(430px, 100%);
-    min-height: 0;
-    height: 94vh;
-    height: 94svh;
-    border: 1px solid rgb(255 255 255 / 10%);
-    border-radius: 40px;
-    box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
-    transform: translateX(-50%);
-  }
-
-  .welcome-hero {
-    height: 72%;
-  }
-}
-
-@media (max-height: 650px) {
-  .welcome-hero {
-    height: 68%;
-  }
-
-  .welcome-content p {
-    margin-bottom: 24px;
-  }
-
-  .welcome-start {
-    min-height: 56px;
-  }
-
-  .welcome-home-indicator {
-    padding-top: 18px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .welcome-start {
-    transition: none;
-  }
+.welcome-error-msg {
+  color: #ffcdd2;
+  font-size: 14px;
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .welcome-spinner {
@@ -200,4 +186,21 @@
 
 @keyframes welcome-spin {
   to { transform: rotate(360deg); }
+}
+
+@media (max-height: 650px) {
+  .welcome-brand {
+    margin-bottom: 12px;
+  }
+  .welcome-logo {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 6px;
+  }
+  .welcome-content p {
+    margin-bottom: 18px;
+  }
+  .welcome-start {
+    min-height: 48px;
+  }
 }

@@ -16,6 +16,14 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  overflow-y: scroll;
+}
+
+@supports (scrollbar-gutter: stable) {
+  html {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
 }
 
 body {
@@ -112,20 +120,29 @@ button {
   font-size: inherit;
 }
 
+/* ============================================
+   BUTTON DESIGN SYSTEM
+   ============================================ */
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  transition: all var(--transition-base);
+  min-height: var(--btn-height-md);
+  padding: var(--btn-padding-md);
+  border-radius: var(--btn-radius-md);
+  font-family: var(--font-primary);
+  font-size: var(--btn-font-size-md);
+  font-weight: var(--btn-font-weight);
+  letter-spacing: var(--btn-letter-spacing);
+  line-height: 1.2;
   cursor: pointer;
   border: var(--border-width) solid transparent;
   text-decoration: none;
   white-space: nowrap;
-  line-height: 1;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .btn:focus-visible {
@@ -133,37 +150,47 @@ button {
   outline-offset: 2px;
 }
 
+.btn:disabled,
+button:disabled,
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* --- Button Variants --- */
 .btn-primary {
   background: var(--color-primary);
-  color: #fff;
+  color: #ffffff;
   border-color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .btn-primary:hover {
   background: var(--color-primary-dark);
   border-color: var(--color-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26,107,58,0.3);
+  box-shadow: 0 4px 12px rgba(26, 107, 58, 0.25);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-secondary {
+.btn-secondary,
+.btn-outline {
   background: transparent;
   color: var(--color-primary);
-  border-color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover,
+.btn-outline:hover {
   background: var(--color-primary-subtle);
+  border-color: var(--color-primary);
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--color-text-secondary);
-  border-color: var(--color-border);
+  border-color: transparent;
 }
 
 .btn-ghost:hover {
@@ -173,34 +200,109 @@ button {
 
 .btn-gold {
   background: var(--color-gold);
-  color: #fff;
+  color: #ffffff;
   border-color: var(--color-gold);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .btn-gold:hover {
   background: var(--color-gold-light);
+  border-color: var(--color-gold-light);
+  box-shadow: 0 4px 12px rgba(200, 151, 58, 0.25);
 }
 
+.btn-danger {
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-text);
+  border-color: var(--btn-danger-bg);
+}
+
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--btn-danger-bg) 85%, black);
+  border-color: color-mix(in srgb, var(--btn-danger-bg) 85%, black);
+}
+
+.btn-danger-ghost {
+  background: transparent;
+  color: var(--btn-danger-text);
+  border-color: var(--btn-danger-subtle-bg);
+}
+
+.btn-danger-ghost:hover {
+  background: var(--btn-danger-subtle-bg);
+}
+
+/* --- Button Sizes & Shapes --- */
 .btn-sm {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-xs);
+  min-height: var(--btn-height-sm);
+  padding: var(--btn-padding-sm);
+  font-size: var(--btn-font-size-sm);
+  border-radius: var(--btn-radius-sm);
+  gap: 6px;
 }
 
 .btn-lg {
-  padding: var(--space-4) var(--space-8);
-  font-size: var(--text-base);
+  min-height: var(--btn-height-lg);
+  padding: var(--btn-padding-lg);
+  font-size: var(--btn-font-size-lg);
+  border-radius: var(--btn-radius-lg);
+  gap: 10px;
 }
 
+.btn-pill {
+  border-radius: var(--btn-radius-pill);
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* --- Icon-Only Buttons --- */
 .btn-icon {
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  color: var(--color-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-touch-min);
+  height: var(--btn-touch-min);
+  padding: 0;
+  border-radius: var(--btn-radius-md);
+  border: var(--border-width) solid transparent;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .btn-icon:hover {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
+}
+
+.btn-icon.btn-sm {
+  width: var(--btn-height-sm);
+  height: var(--btn-height-sm);
+  border-radius: var(--btn-radius-sm);
+}
+
+.btn-icon-danger {
+  color: var(--color-text-tertiary);
+}
+
+.btn-icon-danger:hover,
+.btn-icon-danger:active {
+  color: var(--btn-danger-subtle-text) !important;
+  background: var(--btn-danger-subtle-bg) !important;
+}
+
+.btn-icon-gold {
+  color: var(--color-gold);
+}
+
+.btn-icon-gold:hover,
+.btn-icon-gold:active {
+  background: var(--color-gold-subtle);
 }
 
 /* ============================================
@@ -508,30 +610,60 @@ input:focus, textarea:focus, select:focus {
   max-width: 320px;
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
+/* Page entrance animation — subtle Y-slide for containers with side-padding */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pure opacity fade for full-bleed edge-to-edge pages.
+   No translateY — these have hero banners that span 100% width, so any
+   Y-translation makes the rounded bottom border-radius appear to jump. */
+@keyframes fade-in-opacity {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }
 
-.slide-up { animation: slide-up 300ms ease both; }
+/* ALL page roots — opacity-only fade-in.
+   Any translateY on an element that controls its own padding-top creates
+   a visible layout shift as the whole page "jumps" up during entry. */
+.page-transition-wrapper,
+.fade-in,
+.page-wrapper,
+.qiraath-page,
+.qiraath-profile-page,
+.qp-page {
+  animation: fade-in-opacity 150ms ease both;
+  will-change: opacity;
+}
 
-/* fade-in class: used on page wrappers. Framer-motion handles page transitions,
-   so this is a lightweight fallback for any elements not wrapped in motion. */
-.fade-in {
-  animation: fade-in 200ms ease both;
+/* Y-slide for inner content elements (cards, modals, toasts) */
+.fade-in-slide,
+.slide-up {
+  animation: fade-in 220ms cubic-bezier(0.2, 0.0, 0, 1.0) both;
+  will-change: opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -656,25 +788,64 @@ input:focus, textarea:focus, select:focus {
   text-decoration: none;
   padding: var(--space-5) 0 0;
   transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 .back-link:hover { color: var(--color-primary); }
 
+/* Universal Secondary Page Navigation */
+.app-top-nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  min-height: 40px;
+}
+
+.app-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: -8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary, #111111);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.15s ease, opacity 0.15s ease, color 0.15s ease;
+  padding: 0;
+}
+
+.app-back-btn:active {
+  opacity: 0.6;
+  background: var(--color-bg-secondary, rgba(0, 0, 0, 0.06));
+}
+
+[data-theme='dark'] .app-back-btn {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .app-back-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 /* Smooth professional click effect for interactive elements */
-button:active, 
-.btn:active, 
-.btn-icon:active, 
+button:active:not(:disabled), 
+.btn:active:not(:disabled), 
+.btn-icon:active:not(:disabled), 
 .navbar-link:active,
 .bottom-nav-item:active,
 .social-card:active,
 .card-hover:active,
 .quick-nav-card:active {
   transform: scale(0.96);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-/* Color/background transitions for interactive elements.
-   Transform is intentionally omitted here so individual components
-   can define their own transform transitions without conflict. */
+/* Color/background transitions for interactive elements. */
 button, .btn, .btn-icon, .navbar-link {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
+

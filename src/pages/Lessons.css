@@ -1,223 +1,447 @@
-.lessons-container {
-  max-width: 960px;
-  padding-top: var(--space-8);
-  padding-bottom: var(--space-12);
+/* ══════════════════════════════════════════════════
+   ISLAMIC LESSONS — UNIFIED SETTINGS-STYLE DESIGN
+   Uses the exact same iOS-inspired Inset Cards,
+   typography, and row layout as Settings.jsx.
+   ══════════════════════════════════════════════════ */
+
+/* Intro Card (Top Banner) */
+.lessons-intro-card {
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #ffffff;
 }
 
-.lessons-header {
-  margin: 0 auto var(--space-8);
+.lessons-intro-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(52, 199, 89, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lessons-intro-icon {
+  color: #34c759;
+}
+
+.lessons-intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lessons-intro-text strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1c1c1e;
+  letter-spacing: -0.01em;
+}
+
+.lessons-intro-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #8e8e93;
+  line-height: 1.4;
+}
+
+/* Subject Icon Squircle */
+.lessons-subject-icon-squircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Row Content Layout */
+.lessons-card-row {
+  text-decoration: none;
+}
+
+.lessons-row-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lessons-count-tag {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8e8e93;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Number Badge in Subject Lessons List */
+.lessons-num-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(52, 199, 89, 0.12);
+  color: #1a6b3a;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+
+.lessons-row-citation {
+  font-size: 11px;
+  color: #a0a0a5;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Subject Overview Card */
+.lessons-overview-card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ffffff;
+}
+
+.lessons-overview-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lessons-overview-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.lessons-overview-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lessons-overview-ta-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1c1c1e;
+}
+
+.lessons-overview-count-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, 0.12);
+  color: #34c759;
+  width: fit-content;
+}
+
+.lessons-overview-desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: #636366;
+  line-height: 1.45;
+}
+
+/* ══════════════════════════════════════════════════
+   LESSON DETAIL VIEW
+   ══════════════════════════════════════════════════ */
+.lessons-detail-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lessons-detail-card {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+}
+
+.lessons-detail-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lessons-detail-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a6b3a;
+}
+
+.lessons-kicker-icon {
+  font-size: 16px;
+}
+
+.lessons-ref-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #636366;
+}
+
+.lessons-detail-tamil-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1c1c1e;
+  line-height: 1.35;
+}
+
+/* Sections Stack */
+.lessons-sections-stack {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #f2f2f5;
+}
+
+.lessons-section-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #f2f2f5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lessons-section-item:last-child {
+  border-bottom: none;
+}
+
+.lessons-section-en-title {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #1c1c1e;
+  letter-spacing: -0.01em;
+}
+
+.lessons-section-en-body {
+  margin: 0;
+  font-size: 14.5px;
+  color: #3a3a3c;
+  line-height: 1.55;
+}
+
+.lessons-section-tamil-wrap {
+  margin-top: 6px;
+  padding-left: 12px;
+  border-left: 3px solid rgba(52, 199, 89, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lessons-section-ta-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1a6b3a;
+}
+
+.lessons-section-ta-body {
+  margin: 0;
+  font-size: 14px;
+  color: #48484a;
+  line-height: 1.6;
+}
+
+/* References Footer */
+.lessons-references-footer {
+  padding-top: 14px;
+  border-top: 1px solid #f2f2f5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lessons-references-heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lessons-references-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #636366;
+}
+
+/* Disclaimer Callout */
+.lessons-disclaimer-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 149, 0, 0.09);
+  border: 1px solid rgba(255, 149, 0, 0.18);
+}
+
+.lessons-disclaimer-icon {
+  color: #ff9500;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lessons-disclaimer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.lessons-disclaimer-text strong {
+  color: #c97500;
+  font-weight: 600;
+}
+
+.lessons-disclaimer-text span {
+  color: #7a5000;
+}
+
+/* Empty State */
+.lessons-empty-group {
+  padding: 44px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   text-align: center;
+  background: #ffffff;
 }
 
-.lessons-header-icon {
+.lessons-empty-icon {
+  color: #8e8e93;
+}
+
+.lessons-empty-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1c1c1e;
+}
+
+.lessons-btn-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 58px;
-  height: 58px;
-  margin-bottom: var(--space-3);
-  border-radius: 50%;
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-  font-size: 1.8rem;
-}
-
-.lessons-header h1 {
-  margin-bottom: var(--space-2);
-  color: var(--color-text-primary);
-  font-size: var(--text-2xl);
-}
-
-.lessons-header p {
-  color: var(--color-text-secondary);
-}
-
-.lessons-intro-note {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  max-width: 620px;
-  margin: var(--space-3) auto 0;
-  padding: var(--space-3) var(--space-4);
-  color: var(--color-text-secondary);
-  background: var(--color-gold-subtle);
-  border: 1px solid color-mix(in srgb, var(--color-gold) 38%, var(--color-border));
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  line-height: var(--leading-relaxed);
-}
-
-.lessons-intro-note strong {
-  color: var(--color-gold);
-  font-size: var(--text-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.lesson-subjects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-4);
-}
-
-.lesson-subject-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-5);
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: #1a6b3a;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
   text-decoration: none;
+  transition: opacity 0.15s ease;
 }
 
-.lesson-subject-icon {
-  font-size: 1.75rem;
+.lessons-btn-pill:active {
+  opacity: 0.8;
 }
 
-.lesson-subject-card h2 {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-size: var(--text-lg);
+/* ══════════════════════════════════════════════════
+   DARK MODE OVERRIDES (Matching Settings [data-theme='dark'])
+   ══════════════════════════════════════════════════ */
+[data-theme='dark'] .lessons-intro-card,
+[data-theme='dark'] .lessons-overview-card,
+[data-theme='dark'] .lessons-detail-card,
+[data-theme='dark'] .lessons-empty-group {
+  background: #1c1c1e;
 }
 
-.lesson-subject-card > .tamil-text,
-.lesson-card-copy > .tamil-text {
-  color: var(--color-text-secondary);
+[data-theme='dark'] .lessons-intro-text strong,
+[data-theme='dark'] .lessons-overview-ta-title,
+[data-theme='dark'] .lessons-detail-tamil-title,
+[data-theme='dark'] .lessons-section-en-title,
+[data-theme='dark'] .lessons-empty-title {
+  color: #ffffff;
 }
 
-.lesson-subject-card p {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-relaxed);
+[data-theme='dark'] .lessons-intro-text p,
+[data-theme='dark'] .lessons-count-tag,
+[data-theme='dark'] .lessons-overview-desc,
+[data-theme='dark'] .lessons-references-list {
+  color: #8e8e93;
 }
 
-.lesson-count,
-.lesson-card-reference {
-  color: var(--color-text-muted);
-  font-size: var(--text-xs);
+[data-theme='dark'] .lessons-subject-icon-squircle {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.lessons-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+[data-theme='dark'] .lessons-num-badge {
+  background: rgba(52, 199, 89, 0.2);
+  color: #34c759;
 }
 
-.lesson-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  color: var(--color-text-muted);
-  text-decoration: none;
+[data-theme='dark'] .lessons-detail-kicker {
+  color: #34c759;
 }
 
-.lesson-number {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+[data-theme='dark'] .lessons-ref-pill {
+  background: rgba(255, 255, 255, 0.08);
+  color: #8e8e93;
 }
 
-.lesson-card-copy {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.25rem;
+[data-theme='dark'] .lessons-sections-stack,
+[data-theme='dark'] .lessons-section-item,
+[data-theme='dark'] .lessons-references-footer {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-.lesson-card-copy strong {
-  color: var(--color-text-primary);
+[data-theme='dark'] .lessons-section-en-body {
+  color: #d1d1d6;
 }
 
-.lesson-detail {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
+[data-theme='dark'] .lessons-section-ta-title {
+  color: #34c759;
 }
 
-.lesson-subject-kicker {
-  color: var(--color-primary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+[data-theme='dark'] .lessons-section-ta-body {
+  color: #aeaeb2;
 }
 
-.lesson-detail h1 {
-  margin: var(--space-3) 0 var(--space-2);
-  color: var(--color-text-primary);
-  font-size: var(--text-2xl);
+[data-theme='dark'] .lessons-disclaimer-callout {
+  background: rgba(255, 149, 0, 0.12);
+  border-color: rgba(255, 149, 0, 0.25);
 }
 
-.lesson-tamil-title {
-  margin-bottom: var(--space-6);
-  color: var(--color-text-secondary);
+[data-theme='dark'] .lessons-disclaimer-text strong {
+  color: #ff9f0a;
 }
 
-.lesson-detail section {
-  padding: var(--space-4) 0;
-  border-top: var(--border-width) solid var(--color-border-light);
-}
-
-.lesson-detail section h2 {
-  margin-bottom: var(--space-2);
-  color: var(--color-text-primary);
-  font-size: var(--text-base);
-}
-
-.lesson-detail section h3 {
-  margin: var(--space-4) 0 var(--space-2);
-  color: var(--color-text-primary);
-  font-size: var(--text-sm);
-}
-
-.lesson-detail section p {
-  margin: 0;
-  color: var(--color-text-secondary);
-  line-height: var(--leading-relaxed);
-}
-
-.lesson-notes-section + .lesson-notes-section {
-  margin-top: var(--space-2);
-}
-
-.lesson-references ul {
-  margin: 0;
-  padding-left: 1.25rem;
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-}
-
-.lesson-disclaimer {
-  max-width: 760px;
-  margin: var(--space-4) auto 0;
-  padding: var(--space-3) var(--space-4);
-  color: var(--color-text-secondary);
-  background: var(--color-gold-subtle);
-  border: 1px solid color-mix(in srgb, var(--color-gold) 38%, var(--color-border));
-  border-radius: var(--radius-md);
-  font-size: var(--text-xs);
-  line-height: var(--leading-relaxed);
-}
-
-.lessons-empty {
-  color: var(--color-text-secondary);
-}
-
-@media (max-width: 520px) {
-  .lesson-card {
-    gap: var(--space-3);
-    padding: var(--space-4);
-  }
-
-  .lesson-detail h1,
-  .lessons-header h1 {
-    font-size: var(--text-xl);
-  }
+[data-theme='dark'] .lessons-disclaimer-text span {
+  color: #ffd60a;
 }

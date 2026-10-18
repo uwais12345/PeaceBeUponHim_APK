@@ -1,13 +1,15 @@
 const OVERPASS_URLS = [
   'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 const MAX_RESULTS = 40;
 const QUERY_RESULT_LIMIT = 100;
 const CACHE_TTL_MS = 10 * 60 * 1000;
-const OVERPASS_TIMEOUT_MS = 8000;
-const PHOTON_TIMEOUT_MS = 8000;
+const OVERPASS_TIMEOUT_MS = 15000;
+const PHOTON_TIMEOUT_MS = 10000;
 const PHOTON_MIN_INTERVAL_MS = 1100;
+const APP_USER_AGENT = 'PeaceBeUponHimApp/1.0 (Islamic app; contact@peacebeuponhim.com)';
 const MAX_PLACE_QUERY_LENGTH = 100;
 const responseCache = new Map();
 let lastPhotonRequestAt = 0;
@@ -267,6 +269,63 @@ export async function findPlaceCoordinates(query) {
   };
 }
 
+async function loadNominatimElements(location, radiusKm) {
+  const { south, west, north, east } = getSearchBounds(location, radiusKm);
+  const results = [];
+
+  for (const term of ['mosque', 'masjid']) {
+    try {
+      const params = new URLSearchParams({
+        q: term,
+        format: 'jsonv2',
+        bounded: '1',
+        viewbox: `${west},${north},${east},${south}`,
+        limit: '50',
+        addressdetails: '1',
+      });
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': APP_USER_AGENT,
+          },
+          signal: AbortSignal.timeout(OVERPASS_TIMEOUT_MS),
+        },
+      );
+      if (!response.ok) continue;
+      const data = await response.json();
+      if (!Array.isArray(data)) continue;
+
+      for (const item of data) {
+        if (!item.lat || !item.lon) continue;
+        results.push({
+          type: item.osm_type === 'node' ? 'node' : item.osm_type === 'way' ? 'way' : 'relation',
+          id: item.osm_id,
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+          tags: {
+            name: item.display_name?.split(',')[0] || null,
+            'addr:city': item.address?.city || item.address?.town || item.address?.village || null,
+            'addr:street': item.address?.road || null,
+          },
+        });
+      }
+    } catch {
+      // continue with next term
+    }
+  }
+
+  // Deduplicate by osm_id
+  const seen = new Set();
+  return results.filter(el => {
+    const k = `${el.type}-${el.id}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
 async function loadElements(location, radiusKm, forceRefresh) {
   const key = cacheKey(location, radiusKm);
   const cached = responseCache.get(key);
@@ -281,14 +340,19 @@ async function loadElements(location, radiusKm, forceRefresh) {
     lastError = error;
   }
 
-  const query = new URLSearchParams({ data: buildQuery(location, radiusKm) });
+  // Try Overpass API (multiple mirrors)
+  const queryStr = buildQuery(location, radiusKm);
   for (const endpoint of OVERPASS_URLS) {
     let response;
     try {
       response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: query,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'Accept': 'application/json',
+          'User-Agent': APP_USER_AGENT,
+        },
+        body: new URLSearchParams({ data: queryStr }),
         signal: AbortSignal.timeout(OVERPASS_TIMEOUT_MS),
       });
     } catch (error) {
@@ -299,7 +363,7 @@ async function loadElements(location, radiusKm, forceRefresh) {
     if (response.status === 429) {
       throw new Error('Search is busy right now. Please wait a moment and try again.');
     }
-    if (response.status === 406) {
+    if (response.status === 406 || response.status === 400) {
       lastError = new Error(`Overpass endpoint returned ${response.status}`);
       continue;
     }
@@ -322,8 +386,17 @@ async function loadElements(location, radiusKm, forceRefresh) {
       lastError = new Error('Overpass response did not include results');
       continue;
     }
+    if (data.elements.length > 0) {
+      return cacheElements(key, data.elements);
+    }
+  }
 
-    return cacheElements(key, data.elements);
+  // Final fallback: Nominatim (OpenStreetMap search API)
+  try {
+    const elements = await loadNominatimElements(location, radiusKm);
+    if (elements.length) return cacheElements(key, elements);
+  } catch (nominatimError) {
+    lastError = nominatimError;
   }
 
   if (lastError?.name === 'TimeoutError' || lastError?.name === 'AbortError') {

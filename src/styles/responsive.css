@@ -44,10 +44,12 @@ input[type="radio"] {
   min-width: 44px;
 }
 
-/* Exceptions: icon-only buttons that have explicit size set */
+/* Exceptions: icon-only buttons or inline horizontal pills that have explicit size set */
 .navbar-search-btn,
 .navbar-hamburger,
-.btn-icon {
+.btn-icon,
+.dua-filter-pill,
+.insp-chip {
   min-height: unset;
   min-width: unset;
 }

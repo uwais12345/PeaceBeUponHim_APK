@@ -23,7 +23,17 @@ export default function AuthModal({ onClose }) {
       else await register(form.name, form.age, form.password);
       onClose();
     } catch (reason) {
-      setError(reason.message || 'Unable to continue. Please try again.');
+      console.warn('[Diagnostics - Auth]:', reason);
+      const msg = (reason?.message || '').toLowerCase();
+      if (!navigator.onLine || msg.includes('fetch') || msg.includes('network')) {
+        setError('Please check your internet connection and try again.');
+      } else if (msg.includes('user already exists') || msg.includes('already taken') || msg.includes('duplicate')) {
+        setError('An account with this name already exists. Please choose another name or sign in.');
+      } else if (msg.includes('invalid') || msg.includes('credential') || msg.includes('password')) {
+        setError('Incorrect name, age, or password. Please try again.');
+      } else {
+        setError(reason?.message && !msg.includes('failed') && !msg.includes('500') ? reason.message : 'Unable to sign in right now. Please try again in a moment.');
+      }
     } finally { setLoading(false); }
   };
 

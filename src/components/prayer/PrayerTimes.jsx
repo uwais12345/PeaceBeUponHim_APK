@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Clock, MapPin } from 'lucide-react';
 import FriendlyError from '../ui/FriendlyError';
 import { parseError } from '../../utils/errorHandling';
+import { useAutoRefresh } from '../../context/NetworkContext';
+import { fetchWithRetry } from '../../services/networkManager';
 import masjidBg from '../../assets/masjid-banner.svg';
 import './PrayerTimes.css';
 
@@ -87,8 +89,10 @@ export default function PrayerTimes() {
     if (!timingsRef.current) setLoading(true);
     if (!isRetry) setError(null);
     try {
-      const res = await fetch(
-        `https://api.aladhan.com/v1/timingsByCity?city=${district}&country=India&method=1`
+      const res = await fetchWithRetry(
+        `https://api.aladhan.com/v1/timingsByCity?city=${district}&country=India&method=1`,
+        {},
+        { retries: 2, backoff: 1000, timeout: 8000 }
       );
       if (!res.ok) throw new Error('Failed to fetch prayer times');
       const data = await res.json();
@@ -114,6 +118,12 @@ export default function PrayerTimes() {
   useEffect(() => {
     fetchPrayerTimes();
   }, [fetchPrayerTimes]);
+
+  // Auto-refresh prayer times when connectivity is restored if in error/missing state
+  useAutoRefresh('prayer-times', () => fetchPrayerTimes(true), {
+    enabled: !!error || !timings,
+    deps: [district, !!error, !timings],
+  });
 
   useEffect(() => {
     const closeDropdown = (e) => {

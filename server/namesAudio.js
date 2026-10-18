@@ -5,19 +5,13 @@ export async function getNameAudio(number) {
     throw new RangeError('Name number must be between 1 and 99.');
   }
 
-  const name = NAMES_OF_ALLAH[number - 1];
-  const params = new URLSearchParams({
-    ie: 'UTF-8',
-    client: 'tw-ob',
-    tl: 'ar',
-    q: name.arabic,
+  const padded = String(number).padStart(3, '0');
+  const response = await fetch(`https://www.islamicity.org/mediaassets/MP3/other/covers/99-names-of-Allah/${padded}.mp3`, {
+    headers: { 'User-Agent': 'PeaceBeUponHimApp/1.0' },
   });
-  const response = await fetch(`https://translate.google.com/translate_tts?${params}`, {
-    headers: { Referer: 'https://translate.google.com/' },
-  });
-  const contentType = response.headers.get('content-type') ?? '';
+  const contentType = response.headers.get('content-type') ?? 'audio/mpeg';
 
-  if (!response.ok || !contentType.startsWith('audio/')) {
+  if (!response.ok) {
     throw new Error(`Arabic audio provider returned HTTP ${response.status}.`);
   }
 

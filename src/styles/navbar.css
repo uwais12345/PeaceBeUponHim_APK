@@ -136,6 +136,295 @@
 
 .navbar-search-btn:hover { background: #1b5543; color: #ffffff; }
 
+/* ── Inline navbar search expansion ── */
+
+/* Wrapper that stretches the search bar across the actions area */
+.navbar-search-expand-wrapper {
+  flex: 1;
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* The search bar container */
+.navbar-search-expand {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Input row inside the search bar */
+.navbar-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  background: #09261c;
+  border: 1px solid rgba(45, 122, 90, 0.45);
+  border-radius: 999px;
+  padding: 0 8px 0 12px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  box-sizing: border-box;
+}
+
+.navbar-search-row:focus-within {
+  border-color: #4faa7e;
+  background: #071f17;
+  box-shadow: 0 0 0 2px rgba(79, 170, 126, 0.22);
+}
+
+.navbar-search-icon-inner {
+  color: #6db892;
+  flex-shrink: 0;
+}
+
+.navbar-search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f0fdf4;
+  font-size: 0.88rem;
+  font-family: inherit;
+  caret-color: #4faa7e;
+  padding: 0;
+  line-height: 1.25;
+}
+
+.navbar-search-input::placeholder {
+  color: #5c997e;
+  font-size: 0.82rem;
+}
+
+/* Suppress all native browser clear/cancel pseudo-elements */
+.navbar-search-input::-webkit-search-cancel-button,
+.navbar-search-input::-webkit-search-decoration,
+.navbar-search-input::-webkit-search-results-button,
+.navbar-search-input::-webkit-search-results-decoration {
+  display: none !important;
+}
+
+.navbar-search-spinner {
+  color: #6db892;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Single unified clear/close action button */
+.navbar-search-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(45, 122, 90, 0.4);
+  background: rgba(18, 66, 52, 0.75);
+  color: #a7dfc4;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.navbar-search-action-btn:hover {
+  background: #1b5543;
+  color: #ffffff;
+  border-color: #3b946e;
+}
+
+.navbar-search-action-btn:active {
+  transform: scale(0.92);
+}
+
+/* Dropdown results panel directly below search field */
+.navbar-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #0b281f;
+  border: 1px solid rgba(45, 122, 90, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-height: min(390px, calc(100vh - var(--navbar-total) - 20px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: var(--z-modal);
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.navbar-search-section {
+  padding: 4px 0;
+}
+
+.navbar-search-section + .navbar-search-section {
+  border-top: 1px solid rgba(35, 88, 67, 0.45);
+  margin-top: 4px;
+  padding-top: 6px;
+}
+
+.navbar-search-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 6px;
+}
+
+.navbar-search-section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6db892;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.navbar-search-count-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(45, 122, 90, 0.3);
+  color: #8be0b6;
+  padding: 1px 7px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.navbar-search-count-badge--gold {
+  background: rgba(233, 168, 37, 0.18);
+  color: #f1bf48;
+}
+
+.navbar-search-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  transition: background 0.15s ease;
+  box-sizing: border-box;
+}
+
+.navbar-search-result:hover,
+.navbar-search-result:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  outline: none;
+}
+
+.navbar-search-result-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.navbar-search-result-icon-box--quran {
+  background: rgba(45, 122, 90, 0.3);
+  color: #67d69e;
+}
+
+.navbar-search-result-icon-box--dua {
+  background: rgba(233, 168, 37, 0.15);
+  color: #e9a825;
+}
+
+.navbar-search-result-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.navbar-search-result-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #eefbf4;
+  line-height: 1.3;
+}
+
+.navbar-search-result-meta {
+  font-size: 0.72rem;
+  color: #72a991;
+  line-height: 1.3;
+}
+
+.navbar-search-result-sub {
+  font-size: 0.76rem;
+  color: #88c7ad;
+  line-height: 1.5;
+  padding: 1px 0 2px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* Ensure Tamil diacritics are never clipped */
+.navbar-search-result-sub--tamil {
+  font-family: inherit;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  padding: 2px 0 3px 0;
+}
+
+.navbar-search-empty,
+.navbar-search-hint,
+.navbar-search-loading {
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.navbar-search-empty-text {
+  font-size: 0.82rem;
+  color: #c7ead9;
+  margin: 0 0 4px;
+}
+
+.navbar-search-empty-sub,
+.navbar-search-hint {
+  font-size: 0.74rem;
+  color: #6da78e;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.navbar-search-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #8be0b6;
+}
+
+/* When search is active — give actions area space */
+.navbar-actions--searching {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+/* Hide hamburger when search is active on mobile */
+.navbar-hamburger--hidden { display: none !important; }
+
+
 /* Hamburger — visible on tablet and desktop; hidden on mobile (bottom-nav handles it) */
 .navbar-hamburger {
   display: flex;
@@ -193,6 +482,12 @@
 /* ============================================
    BOTTOM NAV (MOBILE) — floating pill bar (Figma)
    ============================================ */
+body.poster-modal-active .bottom-nav,
+body:has(.mf-root) .navbar,
+body:has(.mf-root) .bottom-nav {
+  display: none !important;
+}
+
 .bottom-nav {
   display: none;
   position: fixed;
@@ -394,7 +689,7 @@
     padding-top: var(--navbar-total);
     padding-bottom: calc(
       var(--bottom-nav-height) +
-      var(--space-4) +
+      36px +
       env(safe-area-inset-bottom, 0px)
     );
   }
@@ -418,6 +713,51 @@
   /* Narrow screens: allow label to shrink */
   .bottom-nav-item-label {
     font-size: 9px;
+  }
+
+  /* ── Mobile inline search tweaks ── */
+
+  /* Collapse logo text on mobile so circular emblem stays visible and search fits cleanly */
+  .navbar.search-active .navbar-logo-text {
+    display: none;
+  }
+  .navbar.search-active .navbar-logo {
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+
+  /* When search is open: expand the actions area to full remaining width */
+  .navbar-actions--searching {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Make the expand wrapper take full remaining width */
+  .navbar-search-expand-wrapper {
+    flex: 1;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Shorten the input height to sit neatly in the navbar */
+  .navbar-search-row {
+    height: 36px;
+    padding: 0 6px 0 10px;
+    gap: 6px;
+  }
+
+  .navbar-search-input {
+    font-size: 15px; /* Prevents iOS/Android zoom on focus */
+  }
+
+  /* Dropdown sits directly below the search row — clean rounded box without overlapping navbar */
+  .navbar-search-dropdown {
+    max-height: calc(100vh - var(--navbar-total) - 24px);
+    left: 0;
+    right: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(45, 122, 90, 0.45);
+    box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 4px 12px rgba(0, 0, 0, 0.35);
   }
 }
 

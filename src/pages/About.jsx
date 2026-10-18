@@ -1,10 +1,14 @@
 import PageHero from '../components/PageHero';
 import aboutBanner from '../assets/about-banner.svg';
+import BackButton from '../components/ui/BackButton';
 
 export default function About() {
   return (
     <main className="page-wrapper fade-in" id="main-content">
       <div className="container" style={{ maxWidth: '800px' }}>
+        <div className="app-top-nav">
+          <BackButton fallback="/" label="Back" />
+        </div>
         <PageHero
           image={aboutBanner}
           title="About Peace be upon him"

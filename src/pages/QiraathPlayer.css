@@ -1,0 +1,1444 @@
+/* ========================================================
+   QIRAATH FULL PLAYER PAGE
+   Full-screen immersive audio player
+   ======================================================== */
+
+.qp-page {
+  height: 100vh;
+  height: 100dvh;
+  background: var(--color-bg-primary, #f4f7f4);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--navbar-total, 64px);
+  padding-bottom: env(safe-area-inset-bottom, 12px);
+  overflow: hidden; /* single-page, no scrolling */
+  box-sizing: border-box;
+}
+
+
+/* ── Top header bar ── */
+/* ── Top header bar (Minimal & Editorial) ── */
+.qp-header {
+  background: #093c26;
+  background: linear-gradient(180deg, #072e1d 0%, #0e5c3a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  height: 52px;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.qp-header-back {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.qp-header-back:active {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 0.8;
+}
+
+.qp-header-title-box {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.qp-header-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qp-header-sub {
+  font-size: 11.5px;
+  color: #ffae00;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qp-header-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.qp-header-action-btn {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.qp-header-action-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 0.8;
+}
+
+/* ── Now reciting sub-header ── */
+.qp-now-bar {
+  background: #f4f7f4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2eae3;
+}
+.qp-now-collapse {
+  width: 32px; height: 32px;
+  background: #fff;
+  border: 1px solid #e2eae3;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #6b7f74;
+}
+.qp-now-info { text-align: center; }
+.qp-now-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffae00;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.qp-now-surah {
+  font-size: 12px;
+  color: #6b7f74;
+}
+.qp-now-queue {
+  width: 32px; height: 32px;
+  background: #fff;
+  border: 1px solid #e2eae3;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #6b7f74;
+}
+
+/* ── Quran Surah Info Card (Replaces reciter portrait) ── */
+.qp-surah-card {
+  margin: 12px 16px 0;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #072e1d 0%, #0e5c3a 52%, #146e45 100%);
+  border: 1.5px solid rgba(255, 174, 0, 0.45);
+  box-shadow: 0 10px 28px rgba(7, 46, 29, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  padding: 20px 18px 16px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Subtle decorative Islamic glow */
+.qp-surah-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(255, 174, 0, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.qp-surah-card::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(20, 110, 69, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Metadata badges row */
+.qp-card-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.qp-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.qp-badge-number {
+  background: rgba(255, 255, 255, 0.15);
+  color: #f0fdf4;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.qp-badge-ayahs {
+  background: rgba(0, 0, 0, 0.25);
+  color: #c0ebd4;
+  border: 1px solid rgba(192, 235, 212, 0.25);
+}
+
+.qp-badge-gold {
+  background: rgba(255, 174, 0, 0.22);
+  color: #ffdb70;
+  border: 1px solid rgba(255, 174, 0, 0.45);
+}
+
+.qp-badge-emerald {
+  background: rgba(46, 125, 50, 0.35);
+  color: #a4f4c8;
+  border: 1px solid rgba(164, 244, 200, 0.35);
+}
+
+/* Arabic Surah Name */
+.qp-card-arabic {
+  font-family: 'Noto Naskh Arabic', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: #ffdb70;
+  line-height: 1.3;
+  margin: 2px 0 8px;
+  direction: rtl;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45), 0 0 20px rgba(255, 219, 112, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+/* English & Tamil Names */
+.qp-card-names-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.qp-card-name-en {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.qp-card-name-ta {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #a4e0c4;
+}
+
+/* Card footer row: Reciter info + audio pill */
+.qp-card-footer-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+  z-index: 1;
+}
+
+.qp-card-reciter-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+}
+
+.qp-card-reciter-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: #ffae00;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 1px;
+}
+
+.qp-card-reciter-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+.qp-card-reciter-ta {
+  color: #c0ebd4;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+/* Audio quality pill with equalizer bars */
+.qp-card-audio-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 4px 10px;
+  flex-shrink: 0;
+}
+
+.qp-card-audio-dot {
+  width: 6px;
+  height: 6px;
+  background: #6b7f74;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+.qp-card-audio-dot.is-active {
+  background: #ffae00;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.qp-card-audio-rate {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.qp-artwork-badge-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+}
+
+.qp-bar {
+  width: 2.5px;
+  border-radius: 2px;
+  background: #ffae00;
+  animation: eq-bar 0.8s ease-in-out infinite alternate;
+}
+
+.qp-bar:nth-child(1) { height: 6px;  animation-delay: 0s; }
+.qp-bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+.qp-bar:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
+.qp-bar:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+
+@keyframes eq-bar {
+  from { transform: scaleY(0.4); opacity: 0.6; }
+  to   { transform: scaleY(1);   opacity: 1; }
+}
+
+.qp-bar.paused {
+  animation: none;
+  height: 5px;
+  opacity: 0.4;
+}
+
+@media (max-width: 380px) {
+  .qp-surah-card {
+    margin: 8px 12px 0;
+    padding: 16px 12px 14px;
+  }
+  .qp-card-arabic {
+    font-size: 28px;
+  }
+  .qp-card-name-en {
+    font-size: 15px;
+  }
+  .qp-card-reciter-name {
+    max-width: 140px;
+    font-size: 12px;
+  }
+}
+
+/* ── Seekbar ── */
+.qp-seek-wrap {
+  padding: 12px 16px 0;
+  flex-shrink: 0;
+}
+.qp-seek-track {
+  width: 100%;
+  height: 5px;
+  background: #e2eae3;
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.qp-seek-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffae00, #e5a00d);
+  border-radius: 999px;
+  pointer-events: none;
+  transition: width 0.15s linear;
+}
+.qp-seek-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px; height: 14px;
+  background: #ffae00;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255,174,0,0.25);
+  pointer-events: none;
+  transition: left 0.15s linear;
+}
+.qp-seek-input {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+  height: 100%;
+}
+.qp-seek-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #6b7f74;
+}
+.qp-seek-center {
+  font-size: 11px;
+  color: #6b7f74;
+  font-weight: 600;
+}
+
+/* ── Controls (Auxiliary Sleep & Download flanking Play/Pause) ── */
+.qp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 10px 24px 0;
+  flex-shrink: 0;
+}
+
+.qp-ctrl-aux {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #dce5df;
+  color: #55685d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.qp-ctrl-aux:hover {
+  background: #f0f5f2;
+  color: #0e5c3a;
+  border-color: #0e5c3a;
+  transform: translateY(-1px);
+}
+
+.qp-ctrl-aux:active {
+  transform: scale(0.94);
+  background: #e2eae3;
+}
+
+/* Sleep timer state */
+.qp-ctrl-sleep.is-active {
+  background: rgba(255, 174, 0, 0.12);
+  border-color: rgba(255, 174, 0, 0.5);
+  color: #d97706;
+}
+
+.qp-ctrl-aux-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #d97706;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 8px;
+  line-height: 1.2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Download button state */
+.qp-ctrl-download.state-downloaded {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #10b981;
+}
+
+.qp-ctrl-download.state-downloading {
+  background: rgba(255, 174, 0, 0.12);
+  border-color: rgba(255, 174, 0, 0.5);
+  color: #d97706;
+}
+
+.qp-ctrl-download.state-error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.qp-ctrl-aux-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #d97706;
+}
+
+.qp-ctrl-play {
+  width: 58px; height: 58px;
+  background: var(--color-primary, #1a6b3a);
+  border: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(26, 107, 58, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.qp-ctrl-play:hover {
+  transform: scale(1.05);
+  background: var(--color-primary-dark, #124d2b);
+  box-shadow: 0 6px 20px rgba(26, 107, 58, 0.45);
+}
+.qp-ctrl-play:active { transform: scale(0.96); }
+
+.qp-controls-single {
+  justify-content: center !important;
+  padding: 16px 20px 8px !important;
+}
+.qp-controls-single .qp-ctrl-play {
+  width: 64px;
+  height: 64px;
+}
+
+/* Dark mode overrides for controls */
+[data-theme="dark"] .qp-ctrl-aux,
+:root:not([data-theme="light"]) .qp-ctrl-aux {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #d1ded6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .qp-ctrl-aux:hover,
+:root:not([data-theme="light"]) .qp-ctrl-aux:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="dark"] .qp-ctrl-sleep.is-active,
+:root:not([data-theme="light"]) .qp-ctrl-sleep.is-active {
+  background: rgba(255, 174, 0, 0.2);
+  border-color: rgba(255, 174, 0, 0.55);
+  color: #ffae00;
+}
+
+[data-theme="dark"] .qp-ctrl-aux-badge,
+:root:not([data-theme="light"]) .qp-ctrl-aux-badge {
+  background: #ffae00;
+  color: #072e1d;
+}
+
+[data-theme="dark"] .qp-ctrl-download.state-downloaded,
+:root:not([data-theme="light"]) .qp-ctrl-download.state-downloaded {
+  background: rgba(74, 222, 128, 0.18);
+  border-color: rgba(74, 222, 128, 0.45);
+  color: #4ade80;
+}
+
+[data-theme="dark"] .qp-ctrl-download.state-downloading,
+:root:not([data-theme="light"]) .qp-ctrl-download.state-downloading {
+  background: rgba(255, 174, 0, 0.2);
+  border-color: rgba(255, 174, 0, 0.5);
+  color: #ffae00;
+}
+
+/* ── Speed pill ── */
+.qp-speed-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #fff;
+  border: 1px solid #e2eae3;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #6b7f74;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.qp-speed-btn:hover { background: #f4f7f4; color: #0e5c3a; }
+
+/* ── Up next ── */
+.qp-up-next {
+  margin: 20px 16px 0;
+  background: #fff;
+  border: 1px solid #e2eae3;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.qp-up-next-icon {
+  width: 36px; height: 36px;
+  background: #f4f7f4;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #6b7f74;
+  flex-shrink: 0;
+}
+.qp-up-next-info { flex: 1; min-width: 0; }
+.qp-up-next-label {
+  font-size: 9px;
+  font-weight: 800;
+  color: #6b7f74;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.qp-up-next-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #13251d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qp-up-next-sub {
+  font-size: 10px;
+  color: #6b7f74;
+}
+.qp-up-next-btn {
+  background: #0e5c3a;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.qp-up-next-btn:hover { background: #093925; }
+
+/* ── Error state ── */
+.qp-error-banner {
+  margin: 16px;
+  background: #fdf2f2;
+  border: 1px solid #f5c2c2;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qp-error-text {
+  flex: 1;
+  font-size: 13px;
+  color: #ba1a1a;
+}
+.qp-retry-btn {
+  background: #ba1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Buffering overlay ── */
+.qp-buffering {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0 0;
+  font-size: 12px;
+  color: #6b7f74;
+}
+.qp-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid #e2eae3;
+  border-top-color: #0e5c3a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Loading placeholder (no track) ── */
+.qp-no-track {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.qp-no-track-icon { font-size: 48px; }
+.qp-no-track-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #13251d;
+}
+.qp-no-track-sub {
+  font-size: 13px;
+  color: #6b7f74;
+}
+.qp-no-track-btn {
+  background: #0e5c3a;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.qp-no-track-btn:hover { background: #093925; }
+
+/* ── In-Player Reciter Switcher Strip ── */
+.qp-reciter-switcher-strip {
+  background: #fff;
+  border-bottom: 1px solid #e2eae3;
+  padding: 8px 14px;
+}
+.qp-switcher-strip-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #0e5c3a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+.qp-switcher-strip-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.qp-switcher-strip-list::-webkit-scrollbar { display: none; }
+.qp-switcher-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #f4f7f4;
+  border: 1px solid #e2eae3;
+  border-radius: 999px;
+  padding: 4px 10px 4px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #13251d;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.qp-switcher-chip:hover {
+  background: #e2eae3;
+}
+.qp-switcher-chip.active {
+  background: #0e5c3a;
+  border-color: #0e5c3a;
+  color: #fff;
+  font-weight: 700;
+}
+.qp-switcher-chip-icon {
+  width: 16px;
+  height: 16px;
+  color: #0e5c3a;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.qp-switcher-chip.active .qp-switcher-chip-icon {
+  color: #ffae00;
+}
+.qp-switcher-chip-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ── Compact Queue / Next bar ── */
+.qp-compact-queue-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 16px;
+  margin: 8px 16px 0;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2eae3;
+  box-shadow: 0 2px 6px rgba(14,92,58,0.05);
+}
+.qp-compact-queue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #0e5c3a;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.qp-compact-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f4f7f4;
+  border: 1px solid #e2eae3;
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: #13251d;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.qp-compact-next-btn:hover {
+  background: #0e5c3a;
+  color: #fff;
+  border-color: #0e5c3a;
+}
+
+/* ── In-Player Surah Queue Drawer ── */
+.qp-queue-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  animation: fadeIn 0.2s ease;
+}
+.qp-queue-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 75vh;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  z-index: 501;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.25);
+  animation: slideUp 0.25s ease;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.qp-queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #e2eae3;
+}
+.qp-queue-header-title {
+  display: flex;
+  flex-direction: column;
+}
+.qp-queue-header-title span {
+  font-size: 15px;
+  font-weight: 800;
+  color: #13251d;
+}
+.qp-queue-header-title small {
+  font-size: 11px;
+  color: #0e5c3a;
+  font-weight: 600;
+}
+.qp-queue-close {
+  width: 32px;
+  height: 32px;
+  background: #f4f7f4;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7f74;
+  cursor: pointer;
+}
+.qp-queue-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 8px;
+  background: #f4f7f4;
+  border: 1px solid #e2eae3;
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+.qp-queue-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: #13251d;
+}
+.qp-queue-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 20px;
+}
+.qp-queue-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #fff;
+  border: 1px solid #e2eae3;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.qp-queue-item:hover {
+  background: #f4f7f4;
+}
+.qp-queue-item.active {
+  background: rgba(14, 92, 58, 0.08);
+  border-color: #0e5c3a;
+}
+.qp-queue-item-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7f74;
+  width: 26px;
+}
+.qp-queue-item.active .qp-queue-item-num {
+  color: #0e5c3a;
+}
+.qp-queue-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.qp-queue-item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #13251d;
+}
+.qp-queue-item.active .qp-queue-item-name {
+  color: #0e5c3a;
+}
+.qp-queue-item-meta {
+  font-size: 11px;
+  color: #6b7f74;
+}
+.qp-queue-item-ar {
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 13px;
+  color: #c89500;
+  direction: rtl;
+}
+
+/* ========================================================
+   DARK THEME OVERRIDES (Full Player Page & Queue)
+   ======================================================== */
+[data-theme="dark"] .qp-page,
+:root:not([data-theme="light"]) .qp-page {
+  background: #09261c;
+}
+
+[data-theme="dark"] .qp-now-bar,
+:root:not([data-theme="light"]) .qp-now-bar {
+  background: #0a291f;
+  border-bottom: 1px solid #1a523e;
+}
+
+[data-theme="dark"] .qp-now-collapse,
+[data-theme="dark"] .qp-now-queue,
+:root:not([data-theme="light"]) .qp-now-collapse,
+:root:not([data-theme="light"]) .qp-now-queue {
+  background: #113c2e;
+  border-color: #1f5643;
+  color: #86baa5;
+}
+
+[data-theme="dark"] .qp-now-collapse:hover,
+[data-theme="dark"] .qp-now-queue:hover,
+:root:not([data-theme="light"]) .qp-now-collapse:hover,
+:root:not([data-theme="light"]) .qp-now-queue:hover {
+  background: #164938;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .qp-now-surah,
+:root:not([data-theme="light"]) .qp-now-surah {
+  color: #86baa5;
+}
+
+[data-theme="dark"] .qp-seek-track,
+:root:not([data-theme="light"]) .qp-seek-track {
+  background: #1a523e;
+}
+
+[data-theme="dark"] .qp-seek-labels,
+[data-theme="dark"] .qp-seek-center,
+:root:not([data-theme="light"]) .qp-seek-labels,
+:root:not([data-theme="light"]) .qp-seek-center {
+  color: #86baa5;
+}
+
+[data-theme="dark"] .qp-ctrl-sm,
+:root:not([data-theme="light"]) .qp-ctrl-sm {
+  background: #113c2e;
+  border-color: #1f5643;
+  color: #86baa5;
+}
+
+[data-theme="dark"] .qp-ctrl-sm:hover,
+:root:not([data-theme="light"]) .qp-ctrl-sm:hover {
+  background: #164938;
+  color: #ffffff;
+  border-color: #2c7258;
+}
+
+[data-theme="dark"] .qp-ctrl-sm.active,
+:root:not([data-theme="light"]) .qp-ctrl-sm.active {
+  background: rgba(14, 92, 58, 0.4);
+  color: #ffae00;
+  border-color: #ffae00;
+}
+
+[data-theme="dark"] .qp-speed-btn,
+:root:not([data-theme="light"]) .qp-speed-btn {
+  background: #113c2e;
+  border-color: #1f5643;
+  color: #86baa5;
+}
+
+[data-theme="dark"] .qp-speed-btn:hover,
+:root:not([data-theme="light"]) .qp-speed-btn:hover {
+  background: #164938;
+  color: #ffffff;
+  border-color: #2c7258;
+}
+
+[data-theme="dark"] .qp-up-next,
+:root:not([data-theme="light"]) .qp-up-next {
+  background: #113c2e;
+  border-color: #1f5643;
+}
+
+[data-theme="dark"] .qp-up-next-icon,
+:root:not([data-theme="light"]) .qp-up-next-icon {
+  background: #0a2b20;
+  color: #ffae00;
+}
+
+[data-theme="dark"] .qp-up-next-title,
+:root:not([data-theme="light"]) .qp-up-next-title {
+  color: #f0fdf4;
+}
+
+[data-theme="dark"] .qp-up-next-label,
+:root:not([data-theme="light"]) .qp-up-next-label {
+  color: #86baa5;
+}
+
+/* Queue Drawer in Dark Theme */
+[data-theme="dark"] .qp-queue-drawer,
+:root:not([data-theme="light"]) .qp-queue-drawer {
+  background: #0a291f;
+  border-top: 1px solid #1f5643;
+}
+
+[data-theme="dark"] .qp-queue-header,
+:root:not([data-theme="light"]) .qp-queue-header {
+  border-bottom: 1px solid #1f5643;
+}
+
+[data-theme="dark"] .qp-queue-header-title span,
+:root:not([data-theme="light"]) .qp-queue-header-title span {
+  color: #f0fdf4;
+}
+
+[data-theme="dark"] .qp-queue-close,
+:root:not([data-theme="light"]) .qp-queue-close {
+  background: #113c2e;
+  color: #86baa5;
+  border: 1px solid #1f5643;
+}
+
+[data-theme="dark"] .qp-queue-close:hover,
+:root:not([data-theme="light"]) .qp-queue-close:hover {
+  background: #164938;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .qp-queue-search,
+:root:not([data-theme="light"]) .qp-queue-search {
+  background: #113c2e;
+  border-color: #1f5643;
+}
+
+[data-theme="dark"] .qp-queue-search-input,
+:root:not([data-theme="light"]) .qp-queue-search-input {
+  color: #f0fdf4;
+}
+
+[data-theme="dark"] .qp-queue-search-input::placeholder,
+:root:not([data-theme="light"]) .qp-queue-search-input::placeholder {
+  color: #6b9e87;
+}
+
+[data-theme="dark"] .qp-queue-item,
+:root:not([data-theme="light"]) .qp-queue-item {
+  background: #113c2e;
+  border-color: #1f5643;
+}
+
+[data-theme="dark"] .qp-queue-item:hover,
+:root:not([data-theme="light"]) .qp-queue-item:hover {
+  background: #164938;
+  border-color: #2c7258;
+}
+
+[data-theme="dark"] .qp-queue-item.active,
+:root:not([data-theme="light"]) .qp-queue-item.active {
+  background: rgba(14, 92, 58, 0.4);
+  border-color: #3b946e;
+}
+
+[data-theme="dark"] .qp-queue-item-name,
+:root:not([data-theme="light"]) .qp-queue-item-name {
+  color: #f0fdf4;
+}
+
+[data-theme="dark"] .qp-queue-item.active .qp-queue-item-name,
+:root:not([data-theme="light"]) .qp-queue-item.active .qp-queue-item-name {
+  color: #ffae00;
+}
+
+[data-theme="dark"] .qp-queue-item-meta,
+:root:not([data-theme="light"]) .qp-queue-item-meta {
+  color: #86baa5;
+}
+
+[data-theme="dark"] .qp-queue-item-ar,
+:root:not([data-theme="light"]) .qp-queue-item-ar {
+  color: #ffc233;
+}
+
+.qp-spin {
+  animation: qp-spin 0.8s linear infinite;
+}
+
+@keyframes qp-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Offline Badge inside Surah Info Card ── */
+.qp-badge-offline {
+  background: rgba(74, 222, 128, 0.16);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #4ade80;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* ── Offline Tag inside Queue Drawer ── */
+.qp-queue-offline-tag {
+  color: #0e5c3a;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .qp-queue-offline-tag,
+:root:not([data-theme="light"]) .qp-queue-offline-tag {
+  color: #4ade80;
+}
+
+/* ========================================================
+   AUTHENTIC iOS ACTION SHEET — SLEEP TIMER
+   ======================================================== */
+
+.ios-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 12px calc(14px + env(safe-area-inset-bottom, 12px));
+  box-sizing: border-box;
+  animation: iosSheetFadeIn 0.22s ease-out;
+}
+
+@keyframes iosSheetFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ios-action-sheet {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: iosSheetSlideUp 0.26s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+@keyframes iosSheetSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ios-sheet-group {
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-sheet-header {
+  padding: 14px 16px 12px;
+  text-align: center;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+  background: rgba(250, 250, 250, 0.6);
+}
+
+.ios-sheet-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e93;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.ios-sheet-sub {
+  font-size: 11.5px;
+  color: #aeaeb2;
+  font-weight: 400;
+}
+
+.ios-sheet-item {
+  width: 100%;
+  height: 52px;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s ease;
+  box-sizing: border-box;
+}
+
+.ios-sheet-item:last-child {
+  border-bottom: none;
+}
+
+.ios-sheet-item:active {
+  background-color: rgba(60, 60, 67, 0.1);
+}
+
+.ios-sheet-item-label {
+  font-size: 17px;
+  font-weight: 400;
+  color: #0e5c3a;
+  letter-spacing: -0.2px;
+}
+
+.ios-sheet-item.is-selected .ios-sheet-item-label {
+  font-weight: 600;
+  color: #0e5c3a;
+}
+
+.ios-sheet-check {
+  position: absolute;
+  right: 18px;
+  color: #0e5c3a;
+}
+
+.ios-sheet-item.is-destructive .ios-sheet-item-label {
+  color: #ff3b30;
+  font-weight: 500;
+}
+
+.ios-sheet-cancel-group {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.ios-sheet-item.is-cancel {
+  height: 56px;
+  border-bottom: none;
+}
+
+.ios-sheet-item.is-cancel .ios-sheet-item-label {
+  font-size: 17px;
+  font-weight: 600;
+  color: #0e5c3a;
+}
+
+/* ── Dark Mode Overrides ── */
+[data-theme="dark"] .ios-sheet-group,
+:root:not([data-theme="light"]) .ios-sheet-group {
+  background: rgba(30, 30, 32, 0.9);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .ios-sheet-header,
+:root:not([data-theme="light"]) .ios-sheet-header {
+  background: rgba(40, 40, 42, 0.6);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .ios-sheet-item,
+:root:not([data-theme="light"]) .ios-sheet-item {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .ios-sheet-item-label,
+:root:not([data-theme="light"]) .ios-sheet-item-label {
+  color: #4ade80;
+}
+
+[data-theme="dark"] .ios-sheet-item.is-selected .ios-sheet-item-label,
+:root:not([data-theme="light"]) .ios-sheet-item.is-selected .ios-sheet-item-label {
+  color: #ffae00;
+}
+
+[data-theme="dark"] .ios-sheet-check,
+:root:not([data-theme="light"]) .ios-sheet-check {
+  color: #ffae00;
+}
+
+[data-theme="dark"] .ios-sheet-item.is-destructive .ios-sheet-item-label,
+:root:not([data-theme="light"]) .ios-sheet-item.is-destructive .ios-sheet-item-label {
+  color: #ff453a;
+}
+
+[data-theme="dark"] .ios-sheet-item.is-cancel .ios-sheet-item-label,
+:root:not([data-theme="light"]) .ios-sheet-item.is-cancel .ios-sheet-item-label {
+  color: #4ade80;
+}
+
+[data-theme="dark"] .ios-sheet-item:active,
+:root:not([data-theme="light"]) .ios-sheet-item:active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+
+
